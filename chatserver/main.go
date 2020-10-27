@@ -23,12 +23,7 @@ func main() {
 		}
 		who := conn.RemoteAddr().String()
 		fmt.Println(who, "已经建立连接")
-		go func() {
-			input := bufio.NewScanner(conn)
-			for input.Scan() {
-				fmt.Fprintln(conn, "\t", strings.ToUpper(input.Text()))
-			}
-		}()
+		go BecomeUpper(conn)
 		// go ReturnTime(conn)          //输出时间
 	}
 }
@@ -42,5 +37,14 @@ func ReturnTime(c net.Conn) {
 			return // e.g., client disconnected
 		}
 		time.Sleep(1 * time.Second)
+	}
+}
+
+//变大写
+func BecomeUpper(c net.Conn) {
+	defer c.Close()
+	input := bufio.NewScanner(c)
+	for input.Scan() {
+		fmt.Fprintln(c, "\t", strings.ToUpper(input.Text()))
 	}
 }
