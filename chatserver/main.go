@@ -23,7 +23,7 @@ func main() {
 		}
 		who := conn.RemoteAddr().String()
 		fmt.Println(who, "已经建立连接")
-		go BecomeUpper(conn)
+		//go BecomeUpper(conn)
 		// go ReturnTime(conn)          //输出时间
 	}
 }
