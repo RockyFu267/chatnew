@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+type ClientChan chan string
+
+var AllClients = make(map[string]net.Conn)
+
+type ClientInfo struct {
+	ConnChan net.Conn
+	Name     string
+}
+
+var InfoList []ClientInfo
+
 func main() {
 	listener, err := net.Listen("tcp", "localhost:8000")
 	if err != nil {
@@ -16,6 +27,7 @@ func main() {
 		return
 	}
 	fmt.Println("fuck")
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -23,8 +35,26 @@ func main() {
 		}
 		who := conn.RemoteAddr().String()
 		fmt.Println(who, "已经建立连接")
-		//go BecomeUpper(conn)
+		var tmpinfo ClientInfo
+		tmpinfo.ConnChan = conn
+		tmpinfo.Name = who
+		InfoList = append(InfoList, tmpinfo)
+		// go Less5SecondEchoEachOther(tmpinfo) //俩启动间隔小于五秒互相通信
+		//go BecomeUpper(conn)			//变大写
 		// go ReturnTime(conn)          //输出时间
+	}
+}
+
+//俩启动间隔小于五秒互相通信
+func Less5SecondEchoEachOther(tmpinfo ClientInfo) {
+	time.Sleep(5 * time.Second)
+	for k := range InfoList {
+		if InfoList[k].Name != tmpinfo.Name {
+			input := bufio.NewScanner(tmpinfo.ConnChan)
+			for input.Scan() {
+				fmt.Fprintln(InfoList[k].ConnChan, "\t", strings.ToUpper(input.Text()))
+			}
+		}
 	}
 }
 
