@@ -18,6 +18,11 @@ type ClientInfo struct {
 	Name     string
 }
 
+type ClientChInfo struct {
+	Ch   ClientChan
+	Name string
+}
+
 var InfoList []ClientInfo
 
 func main() {
@@ -39,7 +44,7 @@ func main() {
 		tmpinfo.ConnChan = conn
 		tmpinfo.Name = who
 		InfoList = append(InfoList, tmpinfo)
-		go handleConn(conn)
+		go handleConn(tmpinfo)
 		// go Less5SecondEchoEachOther(tmpinfo) //俩启动间隔小于五秒互相通信
 		//go BecomeUpper(conn)			//变大写
 		// go ReturnTime(conn)          //输出时间
@@ -110,24 +115,23 @@ func broadcaster() {
 //!-broadcaster
 
 //!+handleConn
-func handleConn(conn net.Conn) {
+func handleConn(tmpinfo ClientInfo) {
 	ch := make(chan string) // outgoing client messages
-	go clientWriter(conn, ch)
+	go clientWriter(tmpinfo.ConnChan, ch)
 
-	who := conn.RemoteAddr().String()
-	ch <- "You are " + who
-	messages <- who + " has arrived"
+	ch <- "You are " + tmpinfo.Name
+	messages <- tmpinfo.Name + " has arrived"
 	entering <- ch
 
-	input := bufio.NewScanner(conn)
+	input := bufio.NewScanner(tmpinfo.ConnChan)
 	for input.Scan() {
-		messages <- who + ": " + input.Text()
+		messages <- tmpinfo.Name + ": " + input.Text()
 	}
 	// NOTE: ignoring potential errors from input.Err()
 
 	leaving <- ch
-	messages <- who + " has left"
-	conn.Close()
+	messages <- tmpinfo.Name + " has left"
+	tmpinfo.ConnChan.Close()
 }
 
 func clientWriter(conn net.Conn, ch <-chan string) {
