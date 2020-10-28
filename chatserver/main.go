@@ -24,6 +24,7 @@ type ClientChInfo struct {
 }
 
 var InfoList []ClientInfo
+var InfoChList []ClientChInfo
 
 func main() {
 	listener, err := net.Listen("tcp", "localhost:8000")
@@ -118,7 +119,10 @@ func broadcaster() {
 func handleConn(tmpinfo ClientInfo) {
 	ch := make(chan string) // outgoing client messages
 	go clientWriter(tmpinfo.ConnChan, ch)
-
+	var infoChTmp ClientChInfo
+	infoChTmp.Ch = ch
+	infoChTmp.Name = tmpinfo.Name
+	InfoChList = append(InfoChList, infoChTmp)
 	ch <- "You are " + tmpinfo.Name
 	messages <- tmpinfo.Name + " has arrived"
 	entering <- ch
