@@ -129,7 +129,22 @@ func handleConn(tmpinfo ClientInfo) {
 
 	input := bufio.NewScanner(tmpinfo.ConnChan)
 	for input.Scan() {
-		messages <- tmpinfo.Name + ": " + input.Text()
+		if len(input.Text()) == 0 {
+			messages <- tmpinfo.Name + ": " + input.Text()
+			continue
+		}
+		if string(input.Text())[0] == '@' {
+			strtmp := stringToDestinationAddr(input.Text())
+			contenttmp := stringToDestinationContent(input.Text())
+			fmt.Println(strtmp)
+			for k := range InfoChList {
+				if strtmp == InfoChList[k].Name {
+					InfoChList[k].Ch <- tmpinfo.Name + "悄悄对你说: " + contenttmp
+				}
+			}
+		} else {
+			messages <- tmpinfo.Name + ": " + input.Text()
+		}
 	}
 	// NOTE: ignoring potential errors from input.Err()
 
@@ -142,4 +157,28 @@ func clientWriter(conn net.Conn, ch <-chan string) {
 	for msg := range ch {
 		fmt.Fprintln(conn, msg) // NOTE: ignoring network errors
 	}
+}
+
+//截取@的地址
+func stringToDestinationAddr(input string) (output string) {
+	for k := range string(input) {
+		if string(input[k]) == " " {
+			output = string(input)[1:k]
+			break
+		}
+
+	}
+	return output
+}
+
+//截取@的内容
+func stringToDestinationContent(input string) (output string) {
+	for k := range string(input) {
+		if string(input[k]) == " " {
+			output = string(input)[k+1:]
+			break
+		}
+
+	}
+	return output
 }
