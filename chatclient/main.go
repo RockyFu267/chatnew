@@ -33,7 +33,7 @@ func main() {
 		}
 
 	}
-	conn.Close()
+
 	<-done
 
 }
