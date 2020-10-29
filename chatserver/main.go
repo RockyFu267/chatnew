@@ -136,18 +136,27 @@ func handleConn(tmpinfo ClientInfo) {
 		if string(input.Text())[0] == '@' {
 			strtmp := stringToDestinationAddr(input.Text())
 			contenttmp := stringToDestinationContent(input.Text())
-			fmt.Println(strtmp)
+			var sign bool = false
 			for k := range InfoChList {
 				if strtmp == InfoChList[k].Name {
 					InfoChList[k].Ch <- tmpinfo.Name + "悄悄对你说: " + contenttmp
+					sign = true
+					break
 				}
+			}
+			if sign == false {
+				infoChTmp.Ch <- "not found"
 			}
 		} else {
 			messages <- tmpinfo.Name + ": " + input.Text()
 		}
 	}
 	// NOTE: ignoring potential errors from input.Err()
-
+	for k := range InfoChList {
+		if InfoChList[k].Name == infoChTmp.Name {
+			InfoChList = append(InfoChList[:k], InfoChList[(k+1):]...)
+		}
+	}
 	leaving <- ch
 	messages <- tmpinfo.Name + " has left"
 	tmpinfo.ConnChan.Close()
