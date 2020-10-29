@@ -145,6 +145,11 @@ func handleConn(tmpinfo ClientInfo) {
 			if input.Scan() {
 				myname = input.Text()
 			}
+			judge := JudgeStringSpecialSymbol(myname)
+			if judge == false {
+				infoChTmp.Ch <- infoChTmp.Address + ":昵称只支持大小写A-z以及0-9,长度不超过20"
+				continue
+			}
 			var sign bool = false
 			for k := range InfoChList {
 				if InfoChList[k].Name == myname {
@@ -258,8 +263,23 @@ func help() string {
 	return (`
     please choose options:
 		- list : 获取所有在线用户Name			格式:"list"
-		- myname : 注册自己的聊天名称			格式:"myname" 
+		- myname : 注册自己的聊天昵称			格式:"myname" 
         `)
+}
+
+//判断用户名合法性
+func JudgeStringSpecialSymbol(input string) bool {
+	f := func(r rune) bool {
+		return (r < 'A' && r > '9') || r > 'z' || (r > 'Z' && r < 'a') || r < '0'
+	}
+	if strings.IndexFunc(input, f) != -1 {
+		return false
+	}
+	if len(input) >= 20 {
+		return false
+	} else {
+		return true
+	}
 }
 
 func PrintListName() {
