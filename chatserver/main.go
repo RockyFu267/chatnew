@@ -226,6 +226,37 @@ func handleConn(tmpinfo ClientInfo) {
 			tmpData.ChList = append(tmpData.ChList, infoChTmp)
 			RoomList = append(RoomList, tmpData)
 			infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
+		case "joinroom":
+			if infoChTmp.Name == "" {
+				infoChTmp.Ch <- tmpinfo.Address + ": " + "请先输入昵称"
+				infoChTmp.Ch <- tmpinfo.Address + ": " + help()
+				continue
+			}
+			infoChTmp.Ch <- infoChTmp.Name + ":输入要加入的房间号"
+			var roomname string
+			if input.Scan() {
+				roomname = input.Text()
+			}
+			var sign bool = false
+			for k := range RoomList {
+				if RoomList[k].Name == roomname {
+					for i := range RoomList[k].ChList {
+						if RoomList[k].ChList[i].Name == infoChTmp.Name {
+							infoChTmp.Ch <- infoChTmp.Name + ":你已经加入过该房间"
+							sign = true
+							break
+						}
+					}
+					if sign == true {
+						break
+					}
+					RoomList[k].ChList = append(RoomList[k].ChList, infoChTmp)
+					infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
+				}
+			}
+			if sign == false {
+				infoChTmp.Ch <- "房间不存在，可通过命令listroom查看"
+			}
 		case "help":
 			infoChTmp.Ch <- tmpinfo.Name + ": " + help()
 		default:
@@ -308,9 +339,11 @@ func stringToDestinationContent(input string) (output string) {
 func help() string {
 	return (`
 	please choose options:
+		- joinroom : 加入房间			格式:"joinroom" 
 		- listroom : 获取所有房间号			格式:"listroom" 
 		- listuser : 获取所有在线用户Name			格式:"listuser"
 		- myname : 注册自己的聊天昵称			格式:"myname" 
+		
         `)
 }
 
