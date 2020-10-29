@@ -390,11 +390,11 @@ func stringToDestinationContent(input string) (output string) {
 func help() string {
 	return (`
 	please choose options:
-		- joinroom : 加入房间			格式:"joinroom" 
-		- listroom : 获取所有房间号			格式:"listroom" 
-		- listuser : 获取所有在线用户Name			格式:"listuser"
-		- myname : 注册自己的聊天昵称			格式:"myname" 
-		
+		- createroom : 创建房间
+		- joinroom   : 加入房间
+		- listroom   : 获取所有房间号
+		- listuser   : 获取所有在线用户Name
+		- myname     : 注册自己的聊天昵称
         `)
 }
 
