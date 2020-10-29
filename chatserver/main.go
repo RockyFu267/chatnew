@@ -26,8 +26,14 @@ type ClientChInfo struct {
 	Name    string
 }
 
+type ChatGroup struct {
+	Name   string
+	ChList []ClientChInfo
+}
+
 var InfoList []ClientInfo
 var InfoChList []ClientChInfo
+var RoomList []ChatGroup
 
 func main() {
 	listener, err := net.Listen("tcp", "localhost:8000")
@@ -141,6 +147,7 @@ func handleConn(tmpinfo ClientInfo) {
 				infoChTmp.Ch <- "你已经输入过昵称：" + tmpinfo.Name
 				continue
 			}
+			infoChTmp.Ch <- infoChTmp.Address + ":输入昵称"
 			var myname string
 			if input.Scan() {
 				myname = input.Text()
@@ -173,13 +180,85 @@ func handleConn(tmpinfo ClientInfo) {
 					InfoList[k].Name = myname
 				}
 			}
-		case "list":
+		case "listuser":
 			var strlist []string
 			for k := range InfoChList {
 				strlist = append(strlist, InfoChList[k].Name)
 			}
 			res2B, _ := json.Marshal(strlist)
 			infoChTmp.Ch <- tmpinfo.Name + ": " + string(res2B)
+		case "listroom":
+			var roomlist []string
+			for k := range RoomList {
+				roomlist = append(roomlist, RoomList[k].Name)
+			}
+			res2B, _ := json.Marshal(roomlist)
+			infoChTmp.Ch <- tmpinfo.Name + ": " + string(res2B)
+		case "createroom":
+			if infoChTmp.Name == "" {
+				infoChTmp.Ch <- tmpinfo.Address + ": " + "请先输入昵称"
+				infoChTmp.Ch <- tmpinfo.Address + ": " + help()
+				continue
+			}
+			infoChTmp.Ch <- infoChTmp.Address + ":输入要创建的房间号"
+			var roomname string
+			if input.Scan() {
+				roomname = input.Text()
+			}
+			judge := JudgeStringSpecialSymbol(roomname)
+			if judge == false {
+				infoChTmp.Ch <- infoChTmp.Name + ":房间号只支持大小写A-z以及0-9,长度不超过20"
+				continue
+			}
+			var sign bool = false
+			for k := range RoomList {
+				if RoomList[k].Name == roomname {
+					infoChTmp.Ch <- infoChTmp.Name + ":已被使用,请重试"
+					sign = true
+					break
+				}
+			}
+			if sign == true {
+				continue
+			}
+			var tmpData ChatGroup
+			tmpData.Name = roomname
+			tmpData.ChList = append(tmpData.ChList, infoChTmp)
+			RoomList = append(RoomList, tmpData)
+			infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
+		case "joinroom":
+			if infoChTmp.Name == "" {
+				infoChTmp.Ch <- tmpinfo.Address + ": " + "请先输入昵称"
+				infoChTmp.Ch <- tmpinfo.Address + ": " + help()
+				continue
+			}
+			infoChTmp.Ch <- infoChTmp.Name + ":输入要加入的房间号"
+			var roomname string
+			if input.Scan() {
+				roomname = input.Text()
+			}
+			var sign bool = false
+			for k := range RoomList {
+				if RoomList[k].Name == roomname {
+					for i := range RoomList[k].ChList {
+						if RoomList[k].ChList[i].Name == infoChTmp.Name {
+							infoChTmp.Ch <- infoChTmp.Name + ":你已经加入过该房间"
+							sign = true
+							break
+						}
+					}
+					if sign == true {
+						break
+					}
+					RoomList[k].ChList = append(RoomList[k].ChList, infoChTmp)
+					infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
+					sign = true
+					break
+				}
+			}
+			if sign == false {
+				infoChTmp.Ch <- "房间不存在，可通过命令listroom查看"
+			}
 		case "help":
 			infoChTmp.Ch <- tmpinfo.Name + ": " + help()
 		default:
@@ -204,7 +283,25 @@ func handleConn(tmpinfo ClientInfo) {
 					}
 				}
 				if sign == false {
-					infoChTmp.Ch <- "not found"
+					infoChTmp.Ch <- "user not found"
+				}
+				continue
+			}
+			if string(input.Text())[0] == '#' {
+				strtmp := stringToDestinationAddr(input.Text())
+				contenttmp := stringToDestinationContent(input.Text())
+				var sign bool = false
+				for k := range RoomList {
+					if strtmp == RoomList[k].Name {
+						for i := range RoomList[k].ChList {
+							RoomList[k].ChList[i].Ch <- tmpinfo.Name + "在房间" + strtmp + "小声说: " + contenttmp
+						}
+						sign = true
+						break
+					}
+				}
+				if sign == false {
+					infoChTmp.Ch <- "romm rnot found"
 				}
 			} else {
 				messages <- tmpinfo.Name + ": " + input.Text()
@@ -224,8 +321,16 @@ func handleConn(tmpinfo ClientInfo) {
 			break
 		}
 	}
+	for k := range RoomList {
+		for i := range RoomList[k].ChList {
+			if RoomList[k].ChList[i].Address == infoChTmp.Address {
+				RoomList[k].ChList = append(RoomList[k].ChList[:i], RoomList[k].ChList[(i+1):]...)
+				break
+			}
+		}
+	}
 	leaving <- ch
-	messages <- tmpinfo.Address + " has left"
+	messages <- infoChTmp.Name + " has left"
 	tmpinfo.ConnChan.Close()
 }
 
@@ -261,9 +366,12 @@ func stringToDestinationContent(input string) (output string) {
 
 func help() string {
 	return (`
-    please choose options:
-		- list : 获取所有在线用户Name			格式:"list"
+	please choose options:
+		- joinroom : 加入房间			格式:"joinroom" 
+		- listroom : 获取所有房间号			格式:"listroom" 
+		- listuser : 获取所有在线用户Name			格式:"listuser"
 		- myname : 注册自己的聊天昵称			格式:"myname" 
+		
         `)
 }
 
