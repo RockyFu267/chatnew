@@ -285,6 +285,7 @@ func handleConn(tmpinfo ClientInfo) {
 				if sign == false {
 					infoChTmp.Ch <- "user not found"
 				}
+				continue
 			}
 			if string(input.Text())[0] == '#' {
 				strtmp := stringToDestinationAddr(input.Text())
