@@ -252,6 +252,8 @@ func handleConn(tmpinfo ClientInfo) {
 					}
 					RoomList[k].ChList = append(RoomList[k].ChList, infoChTmp)
 					infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
+					sign = true
+					break
 				}
 			}
 			if sign == false {
@@ -283,8 +285,6 @@ func handleConn(tmpinfo ClientInfo) {
 				if sign == false {
 					infoChTmp.Ch <- "user not found"
 				}
-			} else {
-				messages <- tmpinfo.Name + ": " + input.Text()
 			}
 			if string(input.Text())[0] == '#' {
 				strtmp := stringToDestinationAddr(input.Text())
@@ -320,8 +320,16 @@ func handleConn(tmpinfo ClientInfo) {
 			break
 		}
 	}
+	for k := range RoomList {
+		for i := range RoomList[k].ChList {
+			if RoomList[k].ChList[i].Address == infoChTmp.Address {
+				RoomList[k].ChList = append(RoomList[k].ChList[:i], RoomList[k].ChList[(i+1):]...)
+				break
+			}
+		}
+	}
 	leaving <- ch
-	messages <- tmpinfo.Address + " has left"
+	messages <- infoChTmp.Name + " has left"
 	tmpinfo.ConnChan.Close()
 }
 
