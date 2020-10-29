@@ -1,11 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net"
 	"os"
-	"time"
 )
 
 func main() {
@@ -14,16 +14,33 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	done := make(chan struct{})
 	defer conn.Close()
 	go func() {
 		if _, err := io.Copy(os.Stdout, conn); err != nil {
 			fmt.Println(err)
 			return
 		}
+		done <- struct{}{}
 	}()
-	if _, err := io.Copy(conn, os.Stdin); err != nil {
-		fmt.Println(err)
-		return
+	ch := make(chan string)
+	go clientWriter(conn, ch)
+	input := bufio.NewScanner(os.Stdin)
+	for input.Scan() {
+		switch input.Text() {
+		default:
+			ch <- input.Text()
+		}
+
 	}
-	time.Sleep(10 * time.Second)
+
+	<-done
+
+}
+
+//clientWriter 接受所有管道
+func clientWriter(conn net.Conn, ch <-chan string) {
+	for msg := range ch {
+		fmt.Fprintln(conn, msg)
+	}
 }
