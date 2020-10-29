@@ -281,7 +281,26 @@ func handleConn(tmpinfo ClientInfo) {
 					}
 				}
 				if sign == false {
-					infoChTmp.Ch <- "not found"
+					infoChTmp.Ch <- "user not found"
+				}
+			} else {
+				messages <- tmpinfo.Name + ": " + input.Text()
+			}
+			if string(input.Text())[0] == '#' {
+				strtmp := stringToDestinationAddr(input.Text())
+				contenttmp := stringToDestinationContent(input.Text())
+				var sign bool = false
+				for k := range RoomList {
+					if strtmp == RoomList[k].Name {
+						for i := range RoomList[k].ChList {
+							RoomList[k].ChList[i].Ch <- tmpinfo.Name + "在房间" + strtmp + "小声说: " + contenttmp
+						}
+						sign = true
+						break
+					}
+				}
+				if sign == false {
+					infoChTmp.Ch <- "romm rnot found"
 				}
 			} else {
 				messages <- tmpinfo.Name + ": " + input.Text()
