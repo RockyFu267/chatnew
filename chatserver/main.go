@@ -10,29 +10,39 @@ import (
 	"time"
 )
 
+//ClientChan 定义双向管道
 type ClientChan chan string
 
+//AllClients 初始化所有的连接map
 var AllClients = make(map[string]net.Conn)
 
+//ClientInfo 定义tcp连接的结构体
 type ClientInfo struct {
 	ConnChan net.Conn
 	Address  string
 	Name     string
 }
 
+//ClientChInfo 定义管道的结构体
 type ClientChInfo struct {
 	Ch      ClientChan
 	Address string
 	Name    string
 }
 
+//ChatGroup 定义组room的结构体
 type ChatGroup struct {
 	Name   string
 	ChList []ClientChInfo
 }
 
+//InfoList 初始化tcp连接的数组 后期可以优化改map
 var InfoList []ClientInfo
+
+//InfoChList 初始化管道的数组 后期可以优化改map
 var InfoChList []ClientChInfo
+
+//RoomList 初始化组room的数组
 var RoomList []ChatGroup
 
 func main() {
@@ -64,7 +74,7 @@ func main() {
 	}
 }
 
-//俩启动间隔小于五秒互相通信
+//Less5SecondEchoEachOther 俩启动间隔小于五秒互相通信
 func Less5SecondEchoEachOther(tmpinfo ClientInfo) {
 	time.Sleep(5 * time.Second)
 	for k := range InfoList {
@@ -77,7 +87,7 @@ func Less5SecondEchoEachOther(tmpinfo ClientInfo) {
 	}
 }
 
-//输出时间
+//ReturnTime 输出时间
 func ReturnTime(c net.Conn) {
 	defer c.Close()
 	for {
@@ -89,7 +99,7 @@ func ReturnTime(c net.Conn) {
 	}
 }
 
-//变大写
+//BecomeUpper 变大写
 func BecomeUpper(c net.Conn) {
 	defer c.Close()
 	input := bufio.NewScanner(c)
@@ -98,12 +108,14 @@ func BecomeUpper(c net.Conn) {
 	}
 }
 
+//后期优化可以加其他的事件管道
 var (
 	entering = make(chan ClientChan)
 	leaving  = make(chan ClientChan)
 	messages = make(chan string) // all incoming client messages
 )
 
+//broadcaster 事件定义
 func broadcaster() {
 	clients := make(map[ClientChan]bool) // all connected clients
 	for {
@@ -375,7 +387,7 @@ func help() string {
         `)
 }
 
-//判断用户名合法性
+//JudgeStringSpecialSymbol 判断用户名合法性
 func JudgeStringSpecialSymbol(input string) bool {
 	f := func(r rune) bool {
 		return (r < 'A' && r > '9') || r > 'z' || (r > 'Z' && r < 'a') || r < '0'
@@ -385,11 +397,12 @@ func JudgeStringSpecialSymbol(input string) bool {
 	}
 	if len(input) >= 20 {
 		return false
-	} else {
-		return true
 	}
+	return true
+
 }
 
+//PrintListName debug时候用的
 func PrintListName() {
 	var strlist []string
 	for k := range InfoChList {
@@ -399,6 +412,8 @@ func PrintListName() {
 		time.Sleep(1 * time.Second)
 	}
 }
+
+//PrintListAddress debug时候用的
 func PrintListAddress() {
 	var strlist []string
 	for k := range InfoChList {
@@ -409,6 +424,7 @@ func PrintListAddress() {
 	}
 }
 
+//Printint debug时候用的
 func Printint() {
 	for k := 0; k < 1000000; k++ {
 		fmt.Println(k)
