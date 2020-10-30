@@ -21,8 +21,8 @@ func main() {
 			fmt.Println(err)
 			return
 		}
-		done <- struct{}{}asd
-		
+		done <- struct{}{}
+
 	}()
 	ch := make(chan string)
 	go clientWriter(conn, ch)
