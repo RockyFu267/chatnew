@@ -30,10 +30,10 @@ type ChatGroup struct {
 	ChList []ClientChInfo
 }
 
-//InfoList 初始化tcp连接的数组 后期可以优化改map
+//InfoList 初始化tcp连接的数组 后期可以优化改map  list不用考虑并发锁的问题
 var InfoList []ClientInfo
 
-//InfoChList 初始化管道的数组 后期可以优化改map
+//InfoChList 初始化管道的数组 后期可以优化改map	list不用考虑并发锁的问题
 var InfoChList []ClientChInfo
 
 //RoomList 初始化组room的数组
@@ -45,3 +45,12 @@ var (
 	Leaving  = make(chan ClientChan)
 	Messages = make(chan string) // all incoming client messages
 )
+
+//InfoMap 优化InfoList改map	要考虑并发锁的问题
+var InfoMap = make(map[string]ClientInfo)
+
+//InfoChMap 优化InfoChList改map	要考虑并发锁的问题
+var InfoChMap = make(map[string]ClientInfo)
+
+//RoomMap 初始化组room的数组	要考虑并发锁的问题
+var RoomMap = make(map[string]ChatGroup)
