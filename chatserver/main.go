@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	Pt "chatserver/publictype"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,41 +10,6 @@ import (
 	"strings"
 	"time"
 )
-
-//ClientChan 定义双向管道
-type ClientChan chan string
-
-//AllClients 初始化所有的连接map
-var AllClients = make(map[string]net.Conn)
-
-//ClientInfo 定义tcp连接的结构体
-type ClientInfo struct {
-	ConnChan net.Conn
-	Address  string
-	Name     string
-}
-
-//ClientChInfo 定义管道的结构体
-type ClientChInfo struct {
-	Ch      ClientChan
-	Address string
-	Name    string
-}
-
-//ChatGroup 定义组room的结构体
-type ChatGroup struct {
-	Name   string
-	ChList []ClientChInfo
-}
-
-//InfoList 初始化tcp连接的数组 后期可以优化改map
-var InfoList []ClientInfo
-
-//InfoChList 初始化管道的数组 后期可以优化改map
-var InfoChList []ClientChInfo
-
-//RoomList 初始化组room的数组
-var RoomList []ChatGroup
 
 func main() {
 	listener, err := net.Listen("tcp", "localhost:8000")
@@ -63,10 +29,10 @@ func main() {
 		}
 		who := conn.RemoteAddr().String()
 		fmt.Println(who, "已经建立连接")
-		var tmpinfo ClientInfo
+		var tmpinfo Pt.ClientInfo
 		tmpinfo.ConnChan = conn
 		tmpinfo.Address = who
-		InfoList = append(InfoList, tmpinfo)
+		Pt.InfoList = append(Pt.InfoList, tmpinfo)
 		go handleConn(tmpinfo)
 		// go Less5SecondEchoEachOther(tmpinfo) //俩启动间隔小于五秒互相通信
 		//go BecomeUpper(conn)			//变大写
@@ -74,29 +40,22 @@ func main() {
 	}
 }
 
-//后期优化可以加其他的事件管道
-var (
-	entering = make(chan ClientChan)
-	leaving  = make(chan ClientChan)
-	messages = make(chan string) // all incoming client messages
-)
-
 //broadcaster 事件定义
 func broadcaster() {
-	clients := make(map[ClientChan]bool) // all connected clients
+	clients := make(map[Pt.ClientChan]bool) // all connected clients
 	for {
 		select {
-		case msg := <-messages:
+		case msg := <-Pt.Messages:
 			// Broadcast incoming message to all
 			// clients' outgoing message channels.
 			for cli := range clients {
 				cli <- msg
 			}
 
-		case cli := <-entering:
+		case cli := <-Pt.Entering:
 			clients[cli] = true
 
-		case cli := <-leaving:
+		case cli := <-Pt.Leaving:
 			delete(clients, cli)
 			close(cli)
 		}
@@ -106,16 +65,16 @@ func broadcaster() {
 //!-broadcaster
 
 //!+handleConn
-func handleConn(tmpinfo ClientInfo) {
+func handleConn(tmpinfo Pt.ClientInfo) {
 	ch := make(chan string) // outgoing client messages
 	go clientWriter(tmpinfo.ConnChan, ch)
-	var infoChTmp ClientChInfo
+	var infoChTmp Pt.ClientChInfo
 	infoChTmp.Ch = ch
 	infoChTmp.Address = tmpinfo.Address
-	InfoChList = append(InfoChList, infoChTmp)
+	Pt.InfoChList = append(Pt.InfoChList, infoChTmp)
 	ch <- "You are " + tmpinfo.Address
-	messages <- tmpinfo.Address + " has arrived"
-	entering <- ch
+	Pt.Messages <- tmpinfo.Address + " has arrived"
+	Pt.Entering <- ch
 
 	input := bufio.NewScanner(tmpinfo.ConnChan)
 	//循环用户输入
@@ -142,9 +101,9 @@ func handleConn(tmpinfo ClientInfo) {
 				continue
 			}
 			var sign bool = false
-			for k := range InfoChList {
+			for k := range Pt.InfoChList {
 				//判断是否有重名
-				if InfoChList[k].Name == myname {
+				if Pt.InfoChList[k].Name == myname {
 					infoChTmp.Ch <- infoChTmp.Address + ":已被使用,请重新输入昵称"
 					//标记有重名
 					sign = true
@@ -159,29 +118,29 @@ func handleConn(tmpinfo ClientInfo) {
 			//一切正常 赋值
 			infoChTmp.Name = myname
 			tmpinfo.Name = myname
-			for k := range InfoChList {
-				if InfoChList[k].Address == tmpinfo.Address {
-					InfoChList[k].Name = myname
+			for k := range Pt.InfoChList {
+				if Pt.InfoChList[k].Address == tmpinfo.Address {
+					Pt.InfoChList[k].Name = myname
 				}
 			}
-			for k := range InfoList {
-				if InfoList[k].Address == tmpinfo.Address {
-					InfoList[k].Name = myname
+			for k := range Pt.InfoList {
+				if Pt.InfoList[k].Address == tmpinfo.Address {
+					Pt.InfoList[k].Name = myname
 				}
 			}
 		//列出所有用户昵称命令 没有昵称也能查询
 		case "listuser":
 			var strlist []string
-			for k := range InfoChList {
-				strlist = append(strlist, InfoChList[k].Name)
+			for k := range Pt.InfoChList {
+				strlist = append(strlist, Pt.InfoChList[k].Name)
 			}
 			res2B, _ := json.Marshal(strlist)
 			infoChTmp.Ch <- tmpinfo.Name + ": " + string(res2B)
 		//列出所有组room命令 没有昵称也能查询
 		case "listroom":
 			var roomlist []string
-			for k := range RoomList {
-				roomlist = append(roomlist, RoomList[k].Name)
+			for k := range Pt.RoomList {
+				roomlist = append(roomlist, Pt.RoomList[k].Name)
 			}
 			res2B, _ := json.Marshal(roomlist)
 			infoChTmp.Ch <- tmpinfo.Name + ": " + string(res2B)
@@ -206,8 +165,8 @@ func handleConn(tmpinfo ClientInfo) {
 			}
 			var sign bool = false
 			//检查重名
-			for k := range RoomList {
-				if RoomList[k].Name == roomname {
+			for k := range Pt.RoomList {
+				if Pt.RoomList[k].Name == roomname {
 					infoChTmp.Ch <- infoChTmp.Name + ":已被使用,请重试"
 					sign = true
 					//跳出此次循环
@@ -219,10 +178,10 @@ func handleConn(tmpinfo ClientInfo) {
 				continue
 			}
 			//正常赋值
-			var tmpData ChatGroup
+			var tmpData Pt.ChatGroup
 			tmpData.Name = roomname
 			tmpData.ChList = append(tmpData.ChList, infoChTmp)
-			RoomList = append(RoomList, tmpData)
+			Pt.RoomList = append(Pt.RoomList, tmpData)
 			infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
 		//加入房间命令
 		case "joinroom":
@@ -239,10 +198,10 @@ func handleConn(tmpinfo ClientInfo) {
 			}
 			var sign bool = false
 			//检查是否存在
-			for k := range RoomList {
-				if RoomList[k].Name == roomname {
-					for i := range RoomList[k].ChList {
-						if RoomList[k].ChList[i].Name == infoChTmp.Name {
+			for k := range Pt.RoomList {
+				if Pt.RoomList[k].Name == roomname {
+					for i := range Pt.RoomList[k].ChList {
+						if Pt.RoomList[k].ChList[i].Name == infoChTmp.Name {
 							infoChTmp.Ch <- infoChTmp.Name + ":你已经加入过该房间"
 							sign = true
 							//跳出房间成员的数组循环
@@ -254,7 +213,7 @@ func handleConn(tmpinfo ClientInfo) {
 						break
 					}
 					//正常赋值
-					RoomList[k].ChList = append(RoomList[k].ChList, infoChTmp)
+					Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList, infoChTmp)
 					infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
 					sign = true
 					break
@@ -276,7 +235,7 @@ func handleConn(tmpinfo ClientInfo) {
 			}
 			//如果输入为空
 			if len(input.Text()) == 0 {
-				messages <- tmpinfo.Name + ": " + input.Text()
+				Pt.Messages <- tmpinfo.Name + ": " + input.Text()
 				//重来 判断
 				continue
 			}
@@ -287,9 +246,9 @@ func handleConn(tmpinfo ClientInfo) {
 				contenttmp := stringToDestinationContent(input.Text())
 				var sign bool = false
 				//在公共管道数组里找目标管道
-				for k := range InfoChList {
-					if strtmp == InfoChList[k].Name {
-						InfoChList[k].Ch <- tmpinfo.Name + "悄悄对你说: " + contenttmp
+				for k := range Pt.InfoChList {
+					if strtmp == Pt.InfoChList[k].Name {
+						Pt.InfoChList[k].Ch <- tmpinfo.Name + "悄悄对你说: " + contenttmp
 						sign = true
 						break
 					}
@@ -308,10 +267,10 @@ func handleConn(tmpinfo ClientInfo) {
 				contenttmp := stringToDestinationContent(input.Text())
 				var sign bool = false
 				//在room数组中找目标管道
-				for k := range RoomList {
-					if strtmp == RoomList[k].Name {
-						for i := range RoomList[k].ChList {
-							RoomList[k].ChList[i].Ch <- tmpinfo.Name + "在房间" + strtmp + "小声说: " + contenttmp
+				for k := range Pt.RoomList {
+					if strtmp == Pt.RoomList[k].Name {
+						for i := range Pt.RoomList[k].ChList {
+							Pt.RoomList[k].ChList[i].Ch <- tmpinfo.Name + "在房间" + strtmp + "小声说: " + contenttmp
 						}
 						sign = true
 						//跳出查找循环
@@ -324,36 +283,36 @@ func handleConn(tmpinfo ClientInfo) {
 				}
 				//最后一个不需要跳出重来判断
 			} else {
-				messages <- tmpinfo.Name + ": " + input.Text()
+				Pt.Messages <- tmpinfo.Name + ": " + input.Text()
 			}
 		}
 	}
 	// NOTE: ignoring potential errors from input.Err()
 	//公共管道数组中删除断开的连接
-	for k := range InfoChList {
-		if InfoChList[k].Address == infoChTmp.Address {
-			InfoChList = append(InfoChList[:k], InfoChList[(k+1):]...)
+	for k := range Pt.InfoChList {
+		if Pt.InfoChList[k].Address == infoChTmp.Address {
+			Pt.InfoChList = append(Pt.InfoChList[:k], Pt.InfoChList[(k+1):]...)
 			break
 		}
 	}
 	//TCP连接数组删除断开的连接
-	for k := range InfoList {
-		if InfoList[k].Address == infoChTmp.Address {
-			InfoList = append(InfoList[:k], InfoList[(k+1):]...)
+	for k := range Pt.InfoList {
+		if Pt.InfoList[k].Address == infoChTmp.Address {
+			Pt.InfoList = append(Pt.InfoList[:k], Pt.InfoList[(k+1):]...)
 			break
 		}
 	}
 	//房间room数组中删除断开的连接
-	for k := range RoomList {
-		for i := range RoomList[k].ChList {
-			if RoomList[k].ChList[i].Address == infoChTmp.Address {
-				RoomList[k].ChList = append(RoomList[k].ChList[:i], RoomList[k].ChList[(i+1):]...)
+	for k := range Pt.RoomList {
+		for i := range Pt.RoomList[k].ChList {
+			if Pt.RoomList[k].ChList[i].Address == infoChTmp.Address {
+				Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList[:i], Pt.RoomList[k].ChList[(i+1):]...)
 				break
 			}
 		}
 	}
-	leaving <- ch
-	messages <- infoChTmp.Name + " has left"
+	Pt.Leaving <- ch
+	Pt.Messages <- infoChTmp.Name + " has left"
 	tmpinfo.ConnChan.Close()
 }
 
@@ -414,13 +373,13 @@ func JudgeStringSpecialSymbol(input string) bool {
 }
 
 //Less5SecondEchoEachOther 俩启动间隔小于五秒互相通信
-func Less5SecondEchoEachOther(tmpinfo ClientInfo) {
+func Less5SecondEchoEachOther(tmpinfo Pt.ClientInfo) {
 	time.Sleep(5 * time.Second)
-	for k := range InfoList {
-		if InfoList[k].Address != tmpinfo.Address {
+	for k := range Pt.InfoList {
+		if Pt.InfoList[k].Address != tmpinfo.Address {
 			input := bufio.NewScanner(tmpinfo.ConnChan)
 			for input.Scan() {
-				fmt.Fprintln(InfoList[k].ConnChan, "\t", strings.ToUpper(input.Text()))
+				fmt.Fprintln(Pt.InfoList[k].ConnChan, "\t", strings.ToUpper(input.Text()))
 			}
 		}
 	}
@@ -450,8 +409,8 @@ func BecomeUpper(c net.Conn) {
 //PrintListName debug时候用的
 func PrintListName() {
 	var strlist []string
-	for k := range InfoChList {
-		strlist = append(strlist, InfoChList[k].Name)
+	for k := range Pt.InfoChList {
+		strlist = append(strlist, Pt.InfoChList[k].Name)
 		res2B, _ := json.Marshal(strlist)
 		fmt.Println(string(res2B))
 		time.Sleep(1 * time.Second)
@@ -461,8 +420,8 @@ func PrintListName() {
 //PrintListAddress debug时候用的
 func PrintListAddress() {
 	var strlist []string
-	for k := range InfoChList {
-		strlist = append(strlist, InfoChList[k].Address)
+	for k := range Pt.InfoChList {
+		strlist = append(strlist, Pt.InfoChList[k].Address)
 		res2B, _ := json.Marshal(strlist)
 		fmt.Println(string(res2B))
 		time.Sleep(1 * time.Second)
