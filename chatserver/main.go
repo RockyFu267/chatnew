@@ -2,13 +2,12 @@ package main
 
 import (
 	"bufio"
+	Cf "chatserver/chfunc"
+	Pf "chatserver/publicfunc"
 	Pt "chatserver/publictype"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net"
-	"strings"
-	"time"
 )
 
 func main() {
@@ -19,9 +18,9 @@ func main() {
 	}
 	fmt.Println("fuck")
 	go broadcaster()
-	// go Printint()
-	go PrintListAddress()
-	go PrintListName()
+	// go Cf.Printint()
+	go Cf.PrintListAddress()
+	go Cf.PrintListName()
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -67,7 +66,7 @@ func broadcaster() {
 //!+handleConn
 func handleConn(tmpinfo Pt.ClientInfo) {
 	ch := make(chan string) // outgoing client messages
-	go clientWriter(tmpinfo.ConnChan, ch)
+	go Cf.ClientWriter(tmpinfo.ConnChan, ch)
 	var infoChTmp Pt.ClientChInfo
 	infoChTmp.Ch = ch
 	infoChTmp.Address = tmpinfo.Address
@@ -94,7 +93,7 @@ func handleConn(tmpinfo Pt.ClientInfo) {
 				myname = input.Text()
 			}
 			//检查合法性
-			judge := JudgeStringSpecialSymbol(myname)
+			judge := Pf.JudgeStringSpecialSymbol(myname)
 			if judge == false {
 				infoChTmp.Ch <- infoChTmp.Address + ":昵称只支持大小写A-z以及0-9,长度不超过20"
 				//重新循环用户输入
@@ -149,7 +148,7 @@ func handleConn(tmpinfo Pt.ClientInfo) {
 			//判断是否有昵称 没有昵称不能操作
 			if infoChTmp.Name == "" {
 				infoChTmp.Ch <- tmpinfo.Address + ": " + "请先输入昵称"
-				infoChTmp.Ch <- tmpinfo.Address + ": " + help()
+				infoChTmp.Ch <- tmpinfo.Address + ": " + Pf.Helpstring()
 				continue
 			}
 			infoChTmp.Ch <- infoChTmp.Address + ":输入要创建的房间号"
@@ -158,7 +157,7 @@ func handleConn(tmpinfo Pt.ClientInfo) {
 				roomname = input.Text()
 			}
 			//合法性检查
-			judge := JudgeStringSpecialSymbol(roomname)
+			judge := Pf.JudgeStringSpecialSymbol(roomname)
 			if judge == false {
 				infoChTmp.Ch <- infoChTmp.Name + ":房间号只支持大小写A-z以及0-9,长度不超过20"
 				continue
@@ -188,7 +187,7 @@ func handleConn(tmpinfo Pt.ClientInfo) {
 			//判断是否有昵称 没有昵称不能操作
 			if infoChTmp.Name == "" {
 				infoChTmp.Ch <- tmpinfo.Address + ": " + "请先输入昵称"
-				infoChTmp.Ch <- tmpinfo.Address + ": " + help()
+				infoChTmp.Ch <- tmpinfo.Address + ": " + Pf.Helpstring()
 				continue
 			}
 			infoChTmp.Ch <- infoChTmp.Name + ":输入要加入的房间号"
@@ -224,12 +223,12 @@ func handleConn(tmpinfo Pt.ClientInfo) {
 				infoChTmp.Ch <- "房间不存在，可通过命令listroom查看"
 			}
 		case "help":
-			infoChTmp.Ch <- tmpinfo.Name + ": " + help()
+			infoChTmp.Ch <- tmpinfo.Name + ": " + Pf.Helpstring()
 		default:
 			//先检查有没有昵称
 			if infoChTmp.Name == "" {
 				infoChTmp.Ch <- tmpinfo.Address + ": " + "请先输入昵称"
-				infoChTmp.Ch <- tmpinfo.Address + ": " + help()
+				infoChTmp.Ch <- tmpinfo.Address + ": " + Pf.Helpstring()
 				//重来 判断
 				continue
 			}
@@ -242,8 +241,8 @@ func handleConn(tmpinfo Pt.ClientInfo) {
 			//私聊1v1
 			if string(input.Text())[0] == '@' {
 				//截取输入
-				strtmp := stringToDestinationAddr(input.Text())
-				contenttmp := stringToDestinationContent(input.Text())
+				strtmp := Pf.StringToDestinationAddr(input.Text())
+				contenttmp := Pf.StringToDestinationContent(input.Text())
 				var sign bool = false
 				//在公共管道数组里找目标管道
 				for k := range Pt.InfoChList {
@@ -263,8 +262,8 @@ func handleConn(tmpinfo Pt.ClientInfo) {
 			//小房间私聊
 			if string(input.Text())[0] == '#' {
 				//截取
-				strtmp := stringToDestinationAddr(input.Text())
-				contenttmp := stringToDestinationContent(input.Text())
+				strtmp := Pf.StringToDestinationAddr(input.Text())
+				contenttmp := Pf.StringToDestinationContent(input.Text())
 				var sign bool = false
 				//在room数组中找目标管道
 				for k := range Pt.RoomList {
@@ -314,124 +313,4 @@ func handleConn(tmpinfo Pt.ClientInfo) {
 	Pt.Leaving <- ch
 	Pt.Messages <- infoChTmp.Name + " has left"
 	tmpinfo.ConnChan.Close()
-}
-
-func clientWriter(conn net.Conn, ch <-chan string) {
-	for msg := range ch {
-		fmt.Fprintln(conn, msg) // NOTE: ignoring network errors
-	}
-}
-
-//截取@的地址
-func stringToDestinationAddr(input string) (output string) {
-	for k := range string(input) {
-		if string(input[k]) == " " {
-			output = string(input)[1:k]
-			break
-		}
-
-	}
-	return output
-}
-
-//截取@的内容
-func stringToDestinationContent(input string) (output string) {
-	for k := range string(input) {
-		if string(input[k]) == " " {
-			output = string(input)[k+1:]
-			break
-		}
-
-	}
-	return output
-}
-
-func help() string {
-	return (`
-	please choose options:
-		- createroom : 创建房间
-		- joinroom   : 加入房间
-		- listroom   : 获取所有房间号
-		- listuser   : 获取所有在线用户Name
-		- myname     : 注册自己的聊天昵称
-        `)
-}
-
-//JudgeStringSpecialSymbol 判断用户名合法性
-func JudgeStringSpecialSymbol(input string) bool {
-	f := func(r rune) bool {
-		return (r < 'A' && r > '9') || r > 'z' || (r > 'Z' && r < 'a') || r < '0'
-	}
-	if strings.IndexFunc(input, f) != -1 {
-		return false
-	}
-	if len(input) >= 20 {
-		return false
-	}
-	return true
-
-}
-
-//Less5SecondEchoEachOther 俩启动间隔小于五秒互相通信
-func Less5SecondEchoEachOther(tmpinfo Pt.ClientInfo) {
-	time.Sleep(5 * time.Second)
-	for k := range Pt.InfoList {
-		if Pt.InfoList[k].Address != tmpinfo.Address {
-			input := bufio.NewScanner(tmpinfo.ConnChan)
-			for input.Scan() {
-				fmt.Fprintln(Pt.InfoList[k].ConnChan, "\t", strings.ToUpper(input.Text()))
-			}
-		}
-	}
-}
-
-//ReturnTime 输出时间
-func ReturnTime(c net.Conn) {
-	defer c.Close()
-	for {
-		_, err := io.WriteString(c, time.Now().Format("15:04:05\n"))
-		if err != nil {
-			return // e.g., client disconnected
-		}
-		time.Sleep(1 * time.Second)
-	}
-}
-
-//BecomeUpper 变大写
-func BecomeUpper(c net.Conn) {
-	defer c.Close()
-	input := bufio.NewScanner(c)
-	for input.Scan() {
-		fmt.Fprintln(c, "\t", strings.ToUpper(input.Text()))
-	}
-}
-
-//PrintListName debug时候用的
-func PrintListName() {
-	var strlist []string
-	for k := range Pt.InfoChList {
-		strlist = append(strlist, Pt.InfoChList[k].Name)
-		res2B, _ := json.Marshal(strlist)
-		fmt.Println(string(res2B))
-		time.Sleep(1 * time.Second)
-	}
-}
-
-//PrintListAddress debug时候用的
-func PrintListAddress() {
-	var strlist []string
-	for k := range Pt.InfoChList {
-		strlist = append(strlist, Pt.InfoChList[k].Address)
-		res2B, _ := json.Marshal(strlist)
-		fmt.Println(string(res2B))
-		time.Sleep(1 * time.Second)
-	}
-}
-
-//Printint debug时候用的
-func Printint() {
-	for k := 0; k < 1000000; k++ {
-		fmt.Println(k)
-		time.Sleep(1 * time.Second)
-	}
 }
