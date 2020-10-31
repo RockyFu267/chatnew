@@ -23,7 +23,7 @@ func MyName(infoChTmp *Pt.ClientChInfo, tmpinfo *Pt.ClientInfo, input *bufio.Sca
 	//检查合法性
 	judge := Pf.JudgeStringSpecialSymbol(myname)
 	if judge == false {
-		infoChTmp.Ch <- infoChTmp.Address + ":昵称只支持大小写A-z以及0-9,长度不超过20"
+		infoChTmp.Ch <- infoChTmp.Address + ":昵称只支持大小写A-z以及0-9,长度不超过20,小于2"
 		//重新循环用户输入
 		return
 	}
@@ -98,7 +98,7 @@ func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 	//合法性检查
 	judge := Pf.JudgeStringSpecialSymbol(roomname)
 	if judge == false {
-		infoChTmp.Ch <- infoChTmp.Name + ":房间号只支持大小写A-z以及0-9,长度不超过20"
+		infoChTmp.Ch <- infoChTmp.Name + ":房间号只支持大小写A-z以及0-9,长度不超过20，小于2"
 		return
 	}
 	var sign bool = false
