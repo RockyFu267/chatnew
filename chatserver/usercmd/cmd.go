@@ -136,6 +136,17 @@ func Joinroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	if input.Scan() {
 		roomname = input.Text()
 	}
+	if roomname == "public" {
+		for k := range Pt.InfoPubChList {
+			if Pt.InfoPubChList[k].Address == infoChTmp.Address {
+				infoChTmp.Ch <- infoChTmp.Name + ":你已经加入过该房间"
+				return
+			}
+		}
+		Pt.InfoPubChList = append(Pt.InfoPubChList, infoChTmp)
+		infoChTmp.Ch <- infoChTmp.Name + ":已加入公共聊天室"
+		return
+	}
 	var sign bool = false
 	//检查是否存在
 	for k := range Pt.RoomList {
@@ -184,7 +195,7 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 	if string(input.Text())[0] == '!' {
 		//截取输入
 		strtmp := Pf.StringToDestinationName(input.Text())
-		if strtmp == "pubilc" {
+		if strtmp == "public" {
 			//在公共管道数组里找目标管道
 			for k := range Pt.InfoPubChList {
 				if infoChTmp.Name == Pt.InfoPubChList[k].Name {
