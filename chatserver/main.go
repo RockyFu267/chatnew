@@ -71,6 +71,7 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	infoChTmp.Ch = ch
 	infoChTmp.Address = tmpinfo.Address
 	Pt.InfoChList = append(Pt.InfoChList, infoChTmp)
+	Pt.InfoPubChList = append(Pt.InfoPubChList, infoChTmp)
 	ch <- "You are " + tmpinfo.Address
 	Pt.Messages <- tmpinfo.Address + " has arrived"
 	Pt.Entering <- ch
@@ -101,10 +102,17 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 		}
 	}
 	// NOTE: ignoring potential errors from input.Err()
-	//公共管道数组中删除断开的连接
+	//总管道数组中删除断开的连接
 	for k := range Pt.InfoChList {
 		if Pt.InfoChList[k].Address == infoChTmp.Address {
 			Pt.InfoChList = append(Pt.InfoChList[:k], Pt.InfoChList[(k+1):]...)
+			break
+		}
+	}
+	//公共管道数组中删除断开的连接
+	for k := range Pt.InfoPubChList {
+		if Pt.InfoPubChList[k].Address == infoChTmp.Address {
+			Pt.InfoPubChList = append(Pt.InfoPubChList[:k], Pt.InfoPubChList[(k+1):]...)
 			break
 		}
 	}

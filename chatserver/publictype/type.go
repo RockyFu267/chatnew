@@ -36,6 +36,9 @@ var InfoList []ClientInfo
 //InfoChList 初始化管道的数组 后期可以优化改map	list不用考虑并发锁的问题
 var InfoChList []ClientChInfo
 
+//InfoPubChList 初始化公共管道的数组 后期可以优化改map	list不用考虑并发锁的问题
+var InfoPubChList []ClientChInfo
+
 //RoomList 初始化组room的数组
 var RoomList []ChatGroup
 

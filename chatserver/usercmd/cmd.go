@@ -50,6 +50,11 @@ func MyName(infoChTmp *Pt.ClientChInfo, tmpinfo *Pt.ClientInfo, input *bufio.Sca
 			Pt.InfoChList[k].Name = myname
 		}
 	}
+	for k := range Pt.InfoPubChList {
+		if Pt.InfoPubChList[k].Address == tmpinfo.Address {
+			Pt.InfoPubChList[k].Name = myname
+		}
+	}
 	for k := range Pt.InfoList {
 		if Pt.InfoList[k].Address == tmpinfo.Address {
 			Pt.InfoList[k].Name = myname
@@ -175,6 +180,50 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		//重来 判断
 		return
 	}
+	//退出组room
+	if string(input.Text())[0] == '!' {
+		//截取输入
+		strtmp := Pf.StringToDestinationName(input.Text())
+		if strtmp == "pubilc" {
+			//在公共管道数组里找目标管道
+			for k := range Pt.InfoPubChList {
+				if infoChTmp.Name == Pt.InfoPubChList[k].Name {
+					for k := range Pt.InfoPubChList {
+						if Pt.InfoPubChList[k].Address == infoChTmp.Address {
+							Pt.InfoPubChList = append(Pt.InfoPubChList[:k], Pt.InfoPubChList[(k+1):]...)
+							infoChTmp.Ch <- infoChTmp.Name + ":成功退出公共聊天"
+							return
+						}
+					}
+					infoChTmp.Ch <- infoChTmp.Name + ":本来就不在该房间"
+					return
+				}
+			}
+			infoChTmp.Ch <- "user not found"
+			//结束public的命令判断
+			return
+		}
+		//在room数组中找目标管道
+		for k := range Pt.RoomList {
+			//判断房间是否存在
+			if strtmp == Pt.RoomList[k].Name {
+				//在房间管道中寻找目标名
+				for i := range Pt.RoomList[k].ChList {
+					//判断管道是否在房间中
+					if Pt.RoomList[k].ChList[i].Address == infoChTmp.Address {
+						Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList[:i], Pt.RoomList[k].ChList[(i+1):]...)
+						infoChTmp.Ch <- infoChTmp.Name + ":成功退出房间" + strtmp
+						return
+					}
+				}
+				infoChTmp.Ch <- infoChTmp.Name + ":本来就不在该房间"
+				return
+			}
+		}
+		infoChTmp.Ch <- "房间不存在"
+		//结束public的命令判断
+		return
+	}
 	//私聊1v1
 	if string(input.Text())[0] == '@' {
 		//截取输入
@@ -219,6 +268,9 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		}
 		//最后一个不需要跳出重来判断
 	} else {
-		Pt.Messages <- infoChTmp.Name + ": " + input.Text()
+		//遍历公共管道数组 公共广播
+		for k := range Pt.InfoPubChList {
+			Pt.InfoPubChList[k].Ch <- infoChTmp.Name + ": " + input.Text()
+		}
 	}
 }
