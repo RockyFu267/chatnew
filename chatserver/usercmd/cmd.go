@@ -261,24 +261,36 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		//截取
 		strtmp := Pf.StringToDestinationAddr(input.Text())
 		contenttmp := Pf.StringToDestinationContent(input.Text())
-		var sign bool = false
-		//在room数组中找目标管道
+		//检查是否已加入目标管道
 		for k := range Pt.RoomList {
 			if strtmp == Pt.RoomList[k].Name {
 				for i := range Pt.RoomList[k].ChList {
-					Pt.RoomList[k].ChList[i].Ch <- infoChTmp.Name + "在房间" + strtmp + "小声说: " + contenttmp
+					if Pt.RoomList[k].ChList[i].Name == infoChTmp.Name {
+						for j := range Pt.RoomList[k].ChList {
+							Pt.RoomList[k].ChList[j].Ch <- infoChTmp.Name + "在房间" + strtmp + "小声说: " + contenttmp
+						}
+						return
+					}
 				}
+				infoChTmp.Ch <- "请先加入房间" + strtmp
+				return
+			}
+		}
+		infoChTmp.Ch <- "room not found"
+		//最后一个不需要跳出重来判断
+	} else {
+		//先判断是不是正在公共组里
+		var sign bool
+		for k := range Pt.InfoPubChList {
+			if Pt.InfoPubChList[k].Name == infoChTmp.Name {
 				sign = true
-				//跳出查找循环
 				break
 			}
 		}
-		//状态未变 没找到
 		if sign == false {
-			infoChTmp.Ch <- "room rnot found"
+			infoChTmp.Ch <- "请先加入public房间"
+			return
 		}
-		//最后一个不需要跳出重来判断
-	} else {
 		//遍历公共管道数组 公共广播
 		for k := range Pt.InfoPubChList {
 			Pt.InfoPubChList[k].Ch <- infoChTmp.Name + ": " + input.Text()
