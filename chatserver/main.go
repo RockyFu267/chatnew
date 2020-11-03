@@ -136,3 +136,22 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + " has left"
 	tmpinfo.ConnChan.Close()
 }
+
+// chTMP := make(chan string)
+// go func() {
+// 	for input.Scan() {
+// 		a := input.Text()
+// 		chTMP <- a
+// 	}
+// }()
+// for {
+// 	select {
+// 	case tmp := <-chTMP:
+// 		fmt.Println("fuck")
+// 		Mesage <- who + "说:" + tmp //连接中断 跳出循环
+// 		log.Println(who + "说:" + input.Text())
+// 	case <-time.After(time.Duration(30 * time.Second)):
+// 		fmt.Println("timeout!!!")
+// 		return
+// 	}
+// }
