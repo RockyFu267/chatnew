@@ -8,6 +8,7 @@ import (
 	Uc "chatserver/usercmd"
 	"fmt"
 	"net"
+	"time"
 )
 
 func main() {
@@ -75,30 +76,56 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	ch <- "You are " + tmpinfo.Address
 	Pt.Messages <- tmpinfo.Address + " has arrived"
 	Pt.Entering <- ch
+	infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
+	//debug
+	infoChTmp.Ch <- "2222"
 
 	input := bufio.NewScanner(tmpinfo.ConnChan)
-	//循环用户输入
-	for input.Scan() {
-		switch input.Text() {
-		//昵称命令
-		case "myname":
-			Uc.MyName(&infoChTmp, tmpinfo, input)
-		//列出所有用户昵称命令 没有昵称也能查询
-		case "listuser":
-			Uc.Listuser(infoChTmp)
-		//列出所有组room命令 没有昵称也能查询
-		case "listroom":
-			Uc.Listroom(infoChTmp)
-		//创建用户命令
-		case "createroom":
-			Uc.Createroom(infoChTmp, tmpinfo.Address, input)
-		//加入房间命令
-		case "joinroom":
-			Uc.Joinroom(infoChTmp, tmpinfo.Address, input)
-		case "help":
+	chInputScanner := make(chan bool)
+	go func() {
+		//循环用户输入
+		for input.Scan() {
+			switch input.Text() {
+			//昵称命令
+			case "myname":
+				Uc.MyName(&infoChTmp, tmpinfo, input)
+			//列出所有用户昵称命令 没有昵称也能查询
+			case "listuser":
+				Uc.Listuser(infoChTmp)
+			//列出所有组room命令 没有昵称也能查询
+			case "listroom":
+				Uc.Listroom(infoChTmp)
+			//创建用户命令
+			case "createroom":
+				Uc.Createroom(infoChTmp, tmpinfo.Address, input)
+			//加入房间命令
+			case "joinroom":
+				Uc.Joinroom(infoChTmp, tmpinfo.Address, input)
+			case "help":
+				infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
+			default:
+				Uc.DefaultCmd(infoChTmp, tmpinfo.Address, input)
+			}
+			chInputScanner <- true
+		}
+	}()
+	for {
+		sign := false
+		select {
+		case <-chInputScanner:
+			sign = true
+		case <-time.After(time.Duration(5 * time.Second)):
+			fmt.Println("timeout!!!")
+			// infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
+			//debug
+			fmt.Println("11111!!!")
+
+			sign = false
+		}
+		if sign == false {
+			//debug
 			infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
-		default:
-			Uc.DefaultCmd(infoChTmp, tmpinfo.Address, input)
+			break
 		}
 	}
 	// NOTE: ignoring potential errors from input.Err()
