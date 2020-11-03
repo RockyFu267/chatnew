@@ -133,6 +133,6 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 		}
 	}
 	Pt.Leaving <- ch
-	Pt.Messages <- infoChTmp.Name + " has left"
+	Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + " has left"
 	tmpinfo.ConnChan.Close()
 }
