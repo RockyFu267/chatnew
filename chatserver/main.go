@@ -121,78 +121,14 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 		select {
 		case <-chScanTurnBool:
 		case <-chScanCloseBool:
-			// NOTE: ignoring potential errors from input.Err()
-			//总管道数组中删除断开的连接
-			for k := range Pt.InfoChList {
-				if Pt.InfoChList[k].Address == infoChTmp.Address {
-					Pt.InfoChList = append(Pt.InfoChList[:k], Pt.InfoChList[(k+1):]...)
-					break
-				}
-			}
-			//公共管道数组中删除断开的连接
-			for k := range Pt.InfoPubChList {
-				if Pt.InfoPubChList[k].Address == infoChTmp.Address {
-					Pt.InfoPubChList = append(Pt.InfoPubChList[:k], Pt.InfoPubChList[(k+1):]...)
-					break
-				}
-			}
-			//TCP连接数组删除断开的连接
-			for k := range Pt.InfoList {
-				if Pt.InfoList[k].Address == infoChTmp.Address {
-					Pt.InfoList = append(Pt.InfoList[:k], Pt.InfoList[(k+1):]...)
-					break
-				}
-			}
-			//房间room数组中删除断开的连接
-			for k := range Pt.RoomList {
-				for i := range Pt.RoomList[k].ChList {
-					if Pt.RoomList[k].ChList[i].Address == infoChTmp.Address {
-						Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList[:i], Pt.RoomList[k].ChList[(i+1):]...)
-						break
-					}
-				}
-			}
-			Pt.Leaving <- ch
 			Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + "has left"
 			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "主动断开连接")
-			tmpinfo.ConnChan.Close()
+			Cf.DeleteConn(infoChTmp, ch, tmpinfo)
 			return
 		case <-time.After(time.Duration(180 * time.Second)):
-			// NOTE: ignoring potential errors from input.Err()
-			//总管道数组中删除断开的连接
-			for k := range Pt.InfoChList {
-				if Pt.InfoChList[k].Address == infoChTmp.Address {
-					Pt.InfoChList = append(Pt.InfoChList[:k], Pt.InfoChList[(k+1):]...)
-					break
-				}
-			}
-			//公共管道数组中删除断开的连接
-			for k := range Pt.InfoPubChList {
-				if Pt.InfoPubChList[k].Address == infoChTmp.Address {
-					Pt.InfoPubChList = append(Pt.InfoPubChList[:k], Pt.InfoPubChList[(k+1):]...)
-					break
-				}
-			}
-			//TCP连接数组删除断开的连接
-			for k := range Pt.InfoList {
-				if Pt.InfoList[k].Address == infoChTmp.Address {
-					Pt.InfoList = append(Pt.InfoList[:k], Pt.InfoList[(k+1):]...)
-					break
-				}
-			}
-			//房间room数组中删除断开的连接
-			for k := range Pt.RoomList {
-				for i := range Pt.RoomList[k].ChList {
-					if Pt.RoomList[k].ChList[i].Address == infoChTmp.Address {
-						Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList[:i], Pt.RoomList[k].ChList[(i+1):]...)
-						break
-					}
-				}
-			}
-			Pt.Leaving <- ch
 			Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + "timeout has left"
 			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "超时断开连接")
-			tmpinfo.ConnChan.Close()
+			Cf.DeleteConn(infoChTmp, ch, tmpinfo)
 			return
 		}
 	}

@@ -81,3 +81,40 @@ func ClientWriter(conn net.Conn, ch <-chan string) {
 		fmt.Fprintln(conn, msg) // NOTE: ignoring network errors
 	}
 }
+
+//DeleteConn 删除连接
+func DeleteConn(infoChTmp Pt.ClientChInfo, ch chan string, tmpinfo *Pt.ClientInfo) {
+	// NOTE: ignoring potential errors from input.Err()
+	//总管道数组中删除断开的连接
+	for k := range Pt.InfoChList {
+		if Pt.InfoChList[k].Address == infoChTmp.Address {
+			Pt.InfoChList = append(Pt.InfoChList[:k], Pt.InfoChList[(k+1):]...)
+			break
+		}
+	}
+	//公共管道数组中删除断开的连接
+	for k := range Pt.InfoPubChList {
+		if Pt.InfoPubChList[k].Address == infoChTmp.Address {
+			Pt.InfoPubChList = append(Pt.InfoPubChList[:k], Pt.InfoPubChList[(k+1):]...)
+			break
+		}
+	}
+	//TCP连接数组删除断开的连接
+	for k := range Pt.InfoList {
+		if Pt.InfoList[k].Address == infoChTmp.Address {
+			Pt.InfoList = append(Pt.InfoList[:k], Pt.InfoList[(k+1):]...)
+			break
+		}
+	}
+	//房间room数组中删除断开的连接
+	for k := range Pt.RoomList {
+		for i := range Pt.RoomList[k].ChList {
+			if Pt.RoomList[k].ChList[i].Address == infoChTmp.Address {
+				Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList[:i], Pt.RoomList[k].ChList[(i+1):]...)
+				break
+			}
+		}
+	}
+	Pt.Leaving <- ch
+	tmpinfo.ConnChan.Close()
+}
