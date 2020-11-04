@@ -8,6 +8,7 @@ import (
 	Uc "chatserver/usercmd"
 	"fmt"
 	"net"
+	"time"
 )
 
 func main() {
@@ -56,7 +57,7 @@ func broadcaster() {
 
 		case cli := <-Pt.Leaving:
 			delete(clients, cli)
-			close(cli)
+			//close(cli)
 		}
 	}
 }
@@ -77,63 +78,114 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	Pt.Entering <- ch
 
 	input := bufio.NewScanner(tmpinfo.ConnChan)
-	//循环用户输入
-	for input.Scan() {
-		switch input.Text() {
-		//昵称命令
-		case "myname":
-			Uc.MyName(&infoChTmp, tmpinfo, input)
-		//列出所有用户昵称命令 没有昵称也能查询
-		case "listuser":
-			Uc.Listuser(infoChTmp)
-		//列出所有组room命令 没有昵称也能查询
-		case "listroom":
-			Uc.Listroom(infoChTmp)
-		//创建用户命令
-		case "createroom":
-			Uc.Createroom(infoChTmp, tmpinfo.Address, input)
-		//加入房间命令
-		case "joinroom":
-			Uc.Joinroom(infoChTmp, tmpinfo.Address, input)
-		case "help":
-			infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
-		default:
-			Uc.DefaultCmd(infoChTmp, tmpinfo.Address, input)
-		}
-	}
-	// NOTE: ignoring potential errors from input.Err()
-	//总管道数组中删除断开的连接
-	for k := range Pt.InfoChList {
-		if Pt.InfoChList[k].Address == infoChTmp.Address {
-			Pt.InfoChList = append(Pt.InfoChList[:k], Pt.InfoChList[(k+1):]...)
-			break
-		}
-	}
-	//公共管道数组中删除断开的连接
-	for k := range Pt.InfoPubChList {
-		if Pt.InfoPubChList[k].Address == infoChTmp.Address {
-			Pt.InfoPubChList = append(Pt.InfoPubChList[:k], Pt.InfoPubChList[(k+1):]...)
-			break
-		}
-	}
-	//TCP连接数组删除断开的连接
-	for k := range Pt.InfoList {
-		if Pt.InfoList[k].Address == infoChTmp.Address {
-			Pt.InfoList = append(Pt.InfoList[:k], Pt.InfoList[(k+1):]...)
-			break
-		}
-	}
-	//房间room数组中删除断开的连接
-	for k := range Pt.RoomList {
-		for i := range Pt.RoomList[k].ChList {
-			if Pt.RoomList[k].ChList[i].Address == infoChTmp.Address {
-				Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList[:i], Pt.RoomList[k].ChList[(i+1):]...)
-				break
+	chScanTurnBool := make(chan bool)
+	chScanCloseBool := make(chan bool)
+	go func() {
+		//循环用户输入
+		for input.Scan() {
+			chScanTurnBool <- true
+			switch input.Text() {
+			//昵称命令
+			case "myname":
+				Uc.MyName(&infoChTmp, tmpinfo, input)
+			//列出所有用户昵称命令 没有昵称也能查询
+			case "listuser":
+				Uc.Listuser(infoChTmp)
+			//列出所有组room命令 没有昵称也能查询
+			case "listroom":
+				Uc.Listroom(infoChTmp)
+			//创建用户命令
+			case "createroom":
+				Uc.Createroom(infoChTmp, tmpinfo.Address, input)
+			//加入房间命令
+			case "joinroom":
+				Uc.Joinroom(infoChTmp, tmpinfo.Address, input)
+			case "help":
+				infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
+			default:
+				Uc.DefaultCmd(infoChTmp, tmpinfo.Address, input)
 			}
 		}
+		chScanCloseBool <- true
+	}()
+	for {
+		select {
+		case <-chScanTurnBool:
+		case <-chScanCloseBool:
+			// NOTE: ignoring potential errors from input.Err()
+			//总管道数组中删除断开的连接
+			for k := range Pt.InfoChList {
+				if Pt.InfoChList[k].Address == infoChTmp.Address {
+					Pt.InfoChList = append(Pt.InfoChList[:k], Pt.InfoChList[(k+1):]...)
+					break
+				}
+			}
+			//公共管道数组中删除断开的连接
+			for k := range Pt.InfoPubChList {
+				if Pt.InfoPubChList[k].Address == infoChTmp.Address {
+					Pt.InfoPubChList = append(Pt.InfoPubChList[:k], Pt.InfoPubChList[(k+1):]...)
+					break
+				}
+			}
+			//TCP连接数组删除断开的连接
+			for k := range Pt.InfoList {
+				if Pt.InfoList[k].Address == infoChTmp.Address {
+					Pt.InfoList = append(Pt.InfoList[:k], Pt.InfoList[(k+1):]...)
+					break
+				}
+			}
+			//房间room数组中删除断开的连接
+			for k := range Pt.RoomList {
+				for i := range Pt.RoomList[k].ChList {
+					if Pt.RoomList[k].ChList[i].Address == infoChTmp.Address {
+						Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList[:i], Pt.RoomList[k].ChList[(i+1):]...)
+						break
+					}
+				}
+			}
+			Pt.Leaving <- ch
+			Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + "has left"
+			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "主动断开连接")
+			tmpinfo.ConnChan.Close()
+			return
+		case <-time.After(time.Duration(30 * time.Second)):
+			// NOTE: ignoring potential errors from input.Err()
+			//总管道数组中删除断开的连接
+			for k := range Pt.InfoChList {
+				if Pt.InfoChList[k].Address == infoChTmp.Address {
+					Pt.InfoChList = append(Pt.InfoChList[:k], Pt.InfoChList[(k+1):]...)
+					break
+				}
+			}
+			//公共管道数组中删除断开的连接
+			for k := range Pt.InfoPubChList {
+				if Pt.InfoPubChList[k].Address == infoChTmp.Address {
+					Pt.InfoPubChList = append(Pt.InfoPubChList[:k], Pt.InfoPubChList[(k+1):]...)
+					break
+				}
+			}
+			//TCP连接数组删除断开的连接
+			for k := range Pt.InfoList {
+				if Pt.InfoList[k].Address == infoChTmp.Address {
+					Pt.InfoList = append(Pt.InfoList[:k], Pt.InfoList[(k+1):]...)
+					break
+				}
+			}
+			//房间room数组中删除断开的连接
+			for k := range Pt.RoomList {
+				for i := range Pt.RoomList[k].ChList {
+					if Pt.RoomList[k].ChList[i].Address == infoChTmp.Address {
+						Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList[:i], Pt.RoomList[k].ChList[(i+1):]...)
+						break
+					}
+				}
+			}
+			Pt.Leaving <- ch
+			Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + "timeout has left"
+			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "超时断开连接")
+			tmpinfo.ConnChan.Close()
+			return
+		}
 	}
-	Pt.Leaving <- ch
-	Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + " has left"
-	fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "断开连接")
-	tmpinfo.ConnChan.Close()
+
 }
