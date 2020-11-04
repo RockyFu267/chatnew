@@ -147,38 +147,28 @@ func Joinroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 		infoChTmp.Ch <- infoChTmp.Name + ":已加入公共聊天室"
 		return
 	}
-	var sign bool = false
 	//检查是否存在
 	for k := range Pt.RoomList {
 		if Pt.RoomList[k].Name == roomname {
 			for i := range Pt.RoomList[k].ChList {
 				if Pt.RoomList[k].ChList[i].Name == infoChTmp.Name {
 					infoChTmp.Ch <- infoChTmp.Name + ":你已经加入过该房间"
-					sign = true
-					//跳出房间成员的数组循环
-					break
+					return
 				}
 			}
-			if sign == true {
-				//已经在该房间 跳出检查的循环
-				break
-			}
 			//房间人数上限
-			if len(Pt.RoomList[k].ChList) >= 4 {
+			if len(Pt.RoomList[k].ChList) >= 10 {
 				infoChTmp.Ch <- infoChTmp.Name + ":房间人数已达上限"
 				return
 			}
 			//正常赋值
 			Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList, infoChTmp)
 			infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
-			sign = true
 			return
 		}
 	}
-	//标记状态未变 不存在该room
-	if sign == false {
-		infoChTmp.Ch <- "房间不存在，可通过命令listroom查看"
-	}
+	infoChTmp.Ch <- "房间不存在，可通过命令listroom查看"
+
 }
 
 //DefaultCmd 加入房间命令

@@ -72,7 +72,7 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	infoChTmp.Ch = ch
 	infoChTmp.Address = tmpinfo.Address
 	//限制聊天室人数上限
-	if len(Pt.InfoChList) >= 5 {
+	if len(Pt.InfoChList) >= 20 {
 		fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "连接达到上限")
 		infoChTmp.Ch <- "连接达到上限"
 		time.Sleep(1 * time.Second)
