@@ -134,5 +134,6 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	}
 	Pt.Leaving <- ch
 	Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + " has left"
+	fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "断开连接")
 	tmpinfo.ConnChan.Close()
 }

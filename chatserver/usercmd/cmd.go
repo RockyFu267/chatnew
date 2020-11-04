@@ -187,7 +187,7 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 	}
 	//如果输入为空
 	if len(input.Text()) == 0 {
-		Pt.Messages <- infoChTmp.Name + ": " + input.Text()
+		//Pt.Messages <- infoChTmp.Name + ": " + input.Text()
 		//重来 判断
 		return
 	}
@@ -293,7 +293,9 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		}
 		//遍历公共管道数组 公共广播
 		for k := range Pt.InfoPubChList {
-			Pt.InfoPubChList[k].Ch <- infoChTmp.Name + ": " + input.Text()
+			if Pt.InfoPubChList[k].Name != "" {
+				Pt.InfoPubChList[k].Ch <- infoChTmp.Name + ": " + input.Text()
+			}
 		}
 	}
 }
