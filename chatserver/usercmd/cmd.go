@@ -163,11 +163,16 @@ func Joinroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 				//已经在该房间 跳出检查的循环
 				break
 			}
+			//房间人数上限
+			if len(Pt.RoomList[k].ChList) >= 4 {
+				infoChTmp.Ch <- infoChTmp.Name + ":房间人数已达上限"
+				return
+			}
 			//正常赋值
 			Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList, infoChTmp)
 			infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
 			sign = true
-			break
+			return
 		}
 	}
 	//标记状态未变 不存在该room

@@ -57,7 +57,7 @@ func broadcaster() {
 
 		case cli := <-Pt.Leaving:
 			delete(clients, cli)
-			//close(cli)
+			close(cli)
 		}
 	}
 }
@@ -71,6 +71,15 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	var infoChTmp Pt.ClientChInfo
 	infoChTmp.Ch = ch
 	infoChTmp.Address = tmpinfo.Address
+	//限制聊天室人数上限
+	if len(Pt.InfoChList) >= 5 {
+		fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "连接达到上限")
+		infoChTmp.Ch <- "连接达到上限"
+		time.Sleep(1 * time.Second)
+		tmpinfo.ConnChan.Close()
+		return
+	}
+
 	Pt.InfoChList = append(Pt.InfoChList, infoChTmp)
 	Pt.InfoPubChList = append(Pt.InfoPubChList, infoChTmp)
 	ch <- "You are " + tmpinfo.Address
@@ -148,7 +157,7 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "主动断开连接")
 			tmpinfo.ConnChan.Close()
 			return
-		case <-time.After(time.Duration(30 * time.Second)):
+		case <-time.After(time.Duration(180 * time.Second)):
 			// NOTE: ignoring potential errors from input.Err()
 			//总管道数组中删除断开的连接
 			for k := range Pt.InfoChList {
