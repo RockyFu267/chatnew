@@ -23,7 +23,7 @@ func MyName(infoChTmp *Pt.ClientChInfo, tmpinfo *Pt.ClientInfo, input *bufio.Sca
 	//检查合法性
 	judge := Pf.JudgeStringSpecialSymbol(myname)
 	if judge == false {
-		infoChTmp.Ch <- infoChTmp.Address + ":昵称只支持大小写A-z以及0-9,长度不超过20,小于2"
+		infoChTmp.Ch <- infoChTmp.Address + ":昵称只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		//重新循环用户输入
 		return
 	}
@@ -101,24 +101,28 @@ func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		infoChTmp.Ch <- infoChTmp.Name + ":房间号只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		return
 	}
-	var sign bool = false
 	//检查重名
 	for k := range Pt.RoomList {
 		if Pt.RoomList[k].Name == roomname {
 			infoChTmp.Ch <- infoChTmp.Name + ":已被使用,请重试"
-			sign = true
-			//跳出此次循环
-			break
+			return
 		}
 	}
-	//出现重名重新循环用户输入
-	if sign == true {
+	infoChTmp.Ch <- infoChTmp.Address + ":输入要创建的房间的AccessKey"
+	var ack string
+	if input.Scan() {
+		ack = input.Text()
+	}
+	judgeack := Pf.JudgeStringSpecialSymbol(ack)
+	if judgeack == false {
+		infoChTmp.Ch <- infoChTmp.Name + ":AccessKey只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		return
 	}
 	//正常赋值
 	var tmpData Pt.ChatGroup
 	tmpData.Name = roomname
 	tmpData.ChList = append(tmpData.ChList, infoChTmp)
+	tmpData.AccessKey = ack
 	Pt.RoomList = append(Pt.RoomList, tmpData)
 	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
 }
@@ -161,12 +165,23 @@ func Joinroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 				infoChTmp.Ch <- infoChTmp.Name + ":房间人数已达上限"
 				return
 			}
+			//检查accesskey的输入
+			infoChTmp.Ch <- infoChTmp.Name + ":输入要加入的房间的AccessKey"
+			var ack string
+			if input.Scan() {
+				ack = input.Text()
+			}
+			if ack != Pt.RoomList[k].AccessKey {
+				infoChTmp.Ch <- infoChTmp.Name + ":AccessKey错误，加入失败"
+				return
+			}
 			//正常赋值
 			Pt.RoomList[k].ChList = append(Pt.RoomList[k].ChList, infoChTmp)
 			infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
 			return
 		}
 	}
+	//循环中没有房间name
 	infoChTmp.Ch <- "房间不存在，可通过命令listroom查看"
 
 }

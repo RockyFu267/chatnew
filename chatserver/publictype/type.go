@@ -26,8 +26,9 @@ type ClientChInfo struct {
 
 //ChatGroup 定义组room的结构体
 type ChatGroup struct {
-	Name   string
-	ChList []ClientChInfo
+	Name      string
+	AccessKey string
+	ChList    []ClientChInfo
 }
 
 //InfoList 初始化tcp连接的数组 后期可以优化改map  list不用考虑并发锁的问题
