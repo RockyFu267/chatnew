@@ -250,19 +250,15 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		//截取输入
 		strtmp := Pf.StringToDestinationAddr(input.Text())
 		contenttmp := Pf.StringToDestinationContent(input.Text())
-		var sign bool = false
+
 		//在公共管道数组里找目标管道
 		for k := range Pt.InfoChList {
 			if strtmp == Pt.InfoChList[k].Name {
 				Pt.InfoChList[k].Ch <- infoChTmp.Name + "悄悄对你说: " + contenttmp
-				sign = true
-				break
+				return
 			}
 		}
-		//状态未变 找不到目标管道
-		if sign == false {
-			infoChTmp.Ch <- "user not found"
-		}
+		infoChTmp.Ch <- "user not found"
 		//重来 判断
 		return
 	}
@@ -308,4 +304,36 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 			}
 		}
 	}
+}
+
+//AddFriends 添加好友
+func AddFriends(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
+	//判断是否有昵称 没有昵称不能操作
+	if infoChTmp.Name == "" {
+		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
+		return
+	}
+	var firendName string
+	if input.Scan() {
+		firendName = input.Text()
+	}
+
+	if _, ok := infoChTmp.Friends[firendName]; ok {
+		//存在
+		infoChTmp.Ch <- infoChTmp.Name + ":你已经加入过该好友"
+		return
+	}
+	for k := range Pt.InfoChList {
+		if firendName == Pt.InfoChList[k].Name {
+			var addContent string
+			if input.Scan() {
+				addContent = input.Text()
+			}
+			Pt.InfoChList[k].Ch <- infoChTmp.Name + "向你发送添加好友请求,并附言:" + addContent
+			infoChTmp.Ch <- infoChTmp.Name + ":已向" + firendName + "发送添加好友请求,等待对方确认"
+			return
+		}
+	}
+	infoChTmp.Ch <- "user not found"
 }

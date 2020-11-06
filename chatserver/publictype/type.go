@@ -22,6 +22,7 @@ type ClientChInfo struct {
 	Ch      ClientChan
 	Address string
 	Name    string
+	Friends map[string]bool
 }
 
 //ChatGroup 定义组room的结构体

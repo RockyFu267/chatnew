@@ -109,6 +109,8 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 			//加入房间命令
 			case "joinroom":
 				Uc.Joinroom(infoChTmp, tmpinfo.Address, input)
+			case "addfriends":
+				Uc.AddFriends(infoChTmp, tmpinfo.Address, input)
 			case "help":
 				infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
 			default:
