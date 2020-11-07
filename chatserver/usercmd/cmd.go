@@ -365,3 +365,46 @@ func AddFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner
 	}
 	infoChTmp.Ch <- "user not found"
 }
+
+//DeleteFriends 添加好友 需要指针会写
+func DeleteFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner) {
+	//判断是否有昵称 没有昵称不能操作
+	if infoChTmp.Name == "" {
+		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
+		return
+	}
+	infoChTmp.Ch <- "请输入要删除为好友的昵称"
+	var firendName string
+	if input.Scan() {
+		firendName = input.Text()
+	}
+	if firendName == infoChTmp.Name {
+		infoChTmp.Ch <- "不能删除自己"
+		return
+	}
+	//检查自身
+	if _, ok := infoChTmp.Friends[firendName]; ok {
+		for k := range Pt.InfoChList {
+			if firendName == Pt.InfoChList[k].Name {
+				//对方是否已经添加过
+				if _, ok := Pt.InfoChList[k].Friends[infoChTmp.Name]; ok {
+					delete(infoChTmp.Friends, firendName)
+					delete(Pt.InfoChList[k].Friends, infoChTmp.Name)
+					infoChTmp.Ch <- infoChTmp.Name + ":你已经删除该好友"
+					Pt.InfoChList[k].Ch <- infoChTmp.Name + "已将你从好友列表中移除"
+					return
+				}
+				infoChTmp.Ch <- infoChTmp.Name + ":对方还未回应你之前的添加好友请求，你的好友请求已收回"
+				delete(infoChTmp.Friends, firendName)
+				return
+			}
+		}
+		//对方已离线
+		delete(infoChTmp.Friends, firendName)
+		infoChTmp.Ch <- infoChTmp.Name + ":你已经删除该好友"
+		return
+	}
+	infoChTmp.Ch <- "user not found in your friednslist"
+	return
+}

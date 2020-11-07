@@ -112,6 +112,8 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 				Uc.Joinroom(infoChTmp, tmpinfo.Address, input)
 			case "addfriends":
 				Uc.AddFriends(&infoChTmp, tmpinfo.Address, input)
+			case "delfriends":
+				Uc.DeleteFriends(&infoChTmp, tmpinfo.Address, input)
 			case "help":
 				infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
 			default:

@@ -59,6 +59,7 @@ func Helpstring() string {
 	please choose options:
         - addfriends : 添加好友 
 		- createroom : 创建房间
+		- delfriends : 删除好友
 		- joinroom   : 加入房间
 		- listroom   : 获取所有房间号
 		- listuser   : 获取所有在线用户Name
