@@ -250,16 +250,28 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		//截取输入
 		strtmp := Pf.StringToDestinationAddr(input.Text())
 		contenttmp := Pf.StringToDestinationContent(input.Text())
-
-		//在公共管道数组里找目标管道
-		for k := range Pt.InfoChList {
-			if strtmp == Pt.InfoChList[k].Name {
-				Pt.InfoChList[k].Ch <- infoChTmp.Name + "悄悄对你说: " + contenttmp
-				return
+		//检查是否在自己的好友列表里
+		if _, ok := infoChTmp.Friends[strtmp]; ok {
+			//存在
+			//在公共管道数组里找目标管道
+			for k := range Pt.InfoChList {
+				if strtmp == Pt.InfoChList[k].Name {
+					//检查是否在对方的好友列表里
+					if _, ok := Pt.InfoChList[k].Friends[infoChTmp.Name]; ok {
+						//直接发送消息
+						Pt.InfoChList[k].Ch <- infoChTmp.Name + "悄悄对你说: " + contenttmp
+						return
+					}
+					//不在对方的列表里
+					infoChTmp.Ch <- "你与" + strtmp + "不是好友关系，请先成为好友"
+					return
+				}
 			}
+			infoChTmp.Ch <- "对方已下线"
+			return
 		}
-		infoChTmp.Ch <- "user not found"
-		//重来 判断
+		//不在自己的列表里
+		infoChTmp.Ch <- "你与" + strtmp + "不是好友关系，请先成为好友"
 		return
 	}
 	//小房间私聊
@@ -306,30 +318,46 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 	}
 }
 
-//AddFriends 添加好友
-func AddFriends(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
+//AddFriends 添加好友 需要指针会写
+func AddFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
 		infoChTmp.Ch <- address + ": " + "请先输入昵称"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
+	infoChTmp.Ch <- "请输入要添加为好友的昵称"
 	var firendName string
 	if input.Scan() {
 		firendName = input.Text()
 	}
-
+	if firendName == infoChTmp.Name {
+		infoChTmp.Ch <- "不能添加自己"
+		return
+	}
+	//先检查自身
 	if _, ok := infoChTmp.Friends[firendName]; ok {
 		//存在
-		infoChTmp.Ch <- infoChTmp.Name + ":你已经加入过该好友"
+		infoChTmp.Ch <- infoChTmp.Name + ":你已经加过该好友"
 		return
 	}
 	for k := range Pt.InfoChList {
 		if firendName == Pt.InfoChList[k].Name {
+			//对方是否已经添加过
+			if _, ok := Pt.InfoChList[k].Friends[infoChTmp.Name]; ok {
+				//对方有，直接添加好友
+				infoChTmp.Friends[firendName] = true
+				infoChTmp.Ch <- infoChTmp.Name + ":" + firendName + "与你成为好友"
+				Pt.InfoChList[k].Ch <- infoChTmp.Name + "已同意添加你为好友"
+				return
+			}
+			//对方没有
+			infoChTmp.Ch <- "请输入验证消息:"
 			var addContent string
 			if input.Scan() {
 				addContent = input.Text()
 			}
+			infoChTmp.Friends[firendName] = true
 			Pt.InfoChList[k].Ch <- infoChTmp.Name + "向你发送添加好友请求,并附言:" + addContent
 			infoChTmp.Ch <- infoChTmp.Name + ":已向" + firendName + "发送添加好友请求,等待对方确认"
 			return

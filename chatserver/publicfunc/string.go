@@ -53,10 +53,11 @@ func StringToDestinationContent(input string) (output string) {
 	return output
 }
 
-//返回help
+//Helpstring 返回help
 func Helpstring() string {
 	return (`
 	please choose options:
+        - addfriends : 添加好友 
 		- createroom : 创建房间
 		- joinroom   : 加入房间
 		- listroom   : 获取所有房间号

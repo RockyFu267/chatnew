@@ -71,6 +71,7 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	var infoChTmp Pt.ClientChInfo
 	infoChTmp.Ch = ch
 	infoChTmp.Address = tmpinfo.Address
+	infoChTmp.Friends = make(map[string]bool)
 	//限制聊天室人数上限
 	if len(Pt.InfoChList) >= 20 {
 		fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "连接达到上限")
@@ -110,7 +111,7 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 			case "joinroom":
 				Uc.Joinroom(infoChTmp, tmpinfo.Address, input)
 			case "addfriends":
-				Uc.AddFriends(infoChTmp, tmpinfo.Address, input)
+				Uc.AddFriends(&infoChTmp, tmpinfo.Address, input)
 			case "help":
 				infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
 			default:
