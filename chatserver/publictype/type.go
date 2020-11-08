@@ -32,6 +32,12 @@ type ChatGroup struct {
 	ChList    []ClientChInfo
 }
 
+//InfoChListStruct 管道list的结构体
+type InfoChListStruct struct {
+	Ack    string
+	ChList []ClientChInfo
+}
+
 //InfoList 初始化tcp连接的数组 后期可以优化改map  list不用考虑并发锁的问题
 var InfoList []ClientInfo
 
@@ -59,3 +65,6 @@ var InfoChMap = make(map[string]ClientInfo)
 
 //RoomMap 初始化组room的数组	要考虑并发锁的问题
 var RoomMap = make(map[string]ChatGroup)
+
+//GameCyclesRoom 石头剪刀布的房间 暂时只支持1v1
+var GameCyclesRoom = make(map[string]InfoChListStruct)
