@@ -4,6 +4,7 @@ import (
 	"bufio"
 	Pf "chatserver/publicfunc"
 	Pt "chatserver/publictype"
+	"fmt"
 )
 
 //CreateCycles 创建石头剪刀布的房间 1v1
@@ -45,7 +46,23 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 	tmpData.ChList = append(tmpData.ChList, infoChTmp)
 	tmpData.Ack = ack
 	Pt.GameCyclesRoom[gamename] = tmpData
-	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
+	// infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
+	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，等待对手"
+	for input.Scan() {
+		switch input.Text() {
+		//准备
+		case "ready":
+			//debug
+			fmt.Println("ready")
+		case "exit":
+			//debug
+			fmt.Println("exit")
+			return
+		default:
+			//debug
+			fmt.Println("default")
+		}
+	}
 	return
 }
 

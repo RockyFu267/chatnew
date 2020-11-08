@@ -116,6 +116,11 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 				Uc.DeleteFriends(&infoChTmp, tmpinfo.Address, input)
 			case "help":
 				infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
+			//游戏
+			case "createcycles":
+				Uc.CreateCycles(infoChTmp, tmpinfo.Address, input)
+			case "joincycles":
+				Uc.JoinCycles(infoChTmp, tmpinfo.Address, input)
 			default:
 				Uc.DefaultCmd(infoChTmp, tmpinfo.Address, input)
 			}
