@@ -50,10 +50,10 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，等待对手"
 	for input.Scan() {
 		switch input.Text() {
-		//准备
-		case "ready":
-			//debug
-			fmt.Println("ready")
+		// //准备
+		// case "ready":
+		// 	//debug
+		// 	fmt.Println("ready")
 		case "exit":
 			//debug
 			fmt.Println("exit")
