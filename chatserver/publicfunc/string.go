@@ -57,7 +57,7 @@ func StringToDestinationContent(input string) (output string) {
 func Helpstring() string {
 	return (`
 	please choose options:
-        - addfriends : 添加好友 
+		- addfriends : 添加好友 
 		- createroom : 创建房间
 		- delfriends : 删除好友
 		- joinroom   : 加入房间
