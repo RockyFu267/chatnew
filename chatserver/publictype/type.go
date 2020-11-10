@@ -58,6 +58,8 @@ type InfoChListStruct struct {
 	ChList []ClientChInfo
 	//能否继续加入
 	JoinStatus bool
+	//GameStatus
+	GameStatus bool
 }
 
 //InfoList 初始化tcp连接的数组 后期可以优化改map  list不用考虑并发锁的问题
