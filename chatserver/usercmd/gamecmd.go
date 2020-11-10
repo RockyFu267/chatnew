@@ -41,8 +41,10 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 		infoChTmp.Ch <- infoChTmp.Name + ":AccessKey只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		return
 	}
+	//wait ----初始化其他信息 因为是公用的对象
 	//正常赋值
 	infoChTmp.RoomLeader = true
+	infoChTmp.ReadyStatus = true
 	var tmpData Pt.InfoChListStruct
 	tmpData.ChList = append(tmpData.ChList, infoChTmp)
 	tmpData.Ack = ack
@@ -51,12 +53,69 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 	Pt.GameCyclesRoom[gamename] = tmpData
 	// infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
 	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，等待对手"
+	//进入游戏房间随时开始
 	for input.Scan() {
 		switch input.Text() {
-		// //准备
-		// case "ready":
-		// 	//debug
-		// 	fmt.Println("ready")
+		//后期会加转让房主的功能所以这里创建者和加入者的条件判断一致
+		case "ready":
+			//判断自己是不是房主 是房主不能准备 只能开始
+			for k := range Pt.GameCyclesRoom[gamename].ChList {
+				if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+					if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
+						infoChTmp.Ch <- infoChTmp.Name + ":你是房主，不能准备(可以在全员准备情况下开始)"
+						break
+					} else {
+						infoChTmp.Ch <- infoChTmp.Name + ":你已经准备(在全员准备情况下房主才能开始)"
+						for k := range Pt.GameCyclesRoom[gamename].ChList {
+							if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+								continue
+							}
+							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已准备"
+						}
+						Pt.GameCyclesRoom[gamename].ChList[k].ReadyStatus = true
+						break
+					}
+				}
+
+			}
+			//debug
+			fmt.Println("ready")
+		//如果还是房主则可以开始
+		case "start":
+			var sign bool
+			//判断自己是不是房主 是房主才能开始
+			for k := range Pt.GameCyclesRoom[gamename].ChList {
+				if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+					if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
+						//先判断是不是所有人都准备了
+						for j := range Pt.GameCyclesRoom[gamename].ChList {
+							if Pt.GameCyclesRoom[gamename].ChList[j].ReadyStatus == true {
+								continue
+							} else {
+								//标记存在没准备的
+								sign = true
+								//提示还没有准备的玩家
+								for k := range Pt.GameCyclesRoom[gamename].ChList {
+									Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[j].Name + "还未准备"
+								}
+							}
+						}
+						if sign == true {
+							break
+						}
+						//全员就绪
+						for k := range Pt.GameCyclesRoom[gamename].ChList {
+							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "比赛开始"
+						}
+						//debug
+						fmt.Println("全员已准备")
+						//---------
+					} else {
+						infoChTmp.Ch <- infoChTmp.Name + ":你不是房主，没有开始权限"
+						break
+					}
+				}
+			}
 		case "exit":
 			//debug
 			fmt.Println("exit")
@@ -84,11 +143,14 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 			//还是房主,就移交给目前0元素位的用户
 			if sign == true {
 				tmpData.ChList[0].RoomLeader = true
+				tmpData.ChList[0].ReadyStatus = true
 			}
 			Pt.GameCyclesRoom[gamename] = tmpData
 			infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
 			//debug
-			fmt.Println(tmpData.ChList[0].RoomLeader)
+			fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].RoomLeader)
+			fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].Name)
+			fmt.Println(len(Pt.GameCyclesRoom[gamename].ChList))
 			//-----------------
 			return
 		default:
@@ -119,12 +181,16 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 	if _, ok := Pt.GameCyclesRoom[gamename]; ok {
 		for k := range Pt.GameCyclesRoom[gamename].ChList {
 			if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+				//2020-11-10 这个逻辑好像不会触发  -待修改
 				infoChTmp.Ch <- infoChTmp.Name + ":你已经加入过该房间"
 				return
 			}
 		}
 		//房间人数上限或游戏中有人退出(德扑的房间存在被淘汰的玩家离场的情况)
 		if len(Pt.GameCyclesRoom[gamename].ChList) >= 2 || Pt.GameCyclesRoom[gamename].JoinStatus == false {
+			//debug
+			fmt.Println(Pt.GameCyclesRoom[gamename].JoinStatus, "----------------")
+			//------
 			infoChTmp.Ch <- infoChTmp.Name + ":房间人数已达上限"
 			return
 		}
@@ -138,20 +204,80 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 			infoChTmp.Ch <- infoChTmp.Name + ":AccessKey错误，加入失败"
 			return
 		}
+		//wait ----初始化其他信息 因为是公用的对象
 		//正常赋值
+		//这段应该可以直接修改值吧  -----在公司的IDE报错------原因待查
 		var tmpData Pt.InfoChListStruct
 		tmpData.ChList = Pt.GameCyclesRoom[gamename].ChList
 		tmpData.Ack = Pt.GameCyclesRoom[gamename].Ack
+		tmpData.JoinStatus = Pt.GameCyclesRoom[gamename].JoinStatus
 		tmpData.ChList = append(tmpData.ChList, infoChTmp)
 		Pt.GameCyclesRoom[gamename] = tmpData
 
 		infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
+		//进入游戏房间随时开始
 		for input.Scan() {
 			switch input.Text() {
-			// //准备
-			// case "ready":
-			// 	//debug
-			// 	fmt.Println("ready")
+			//准备
+			case "ready":
+				//判断自己是不是房主 是房主不能准备 只能开始
+				for k := range Pt.GameCyclesRoom[gamename].ChList {
+					if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+						if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
+							infoChTmp.Ch <- infoChTmp.Name + ":你是房主，不能准备(可以在全员准备情况下开始)"
+							break
+						} else {
+							infoChTmp.Ch <- infoChTmp.Name + ":你已经准备(在全员准备情况下房主才能开始)"
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+									continue
+								}
+								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已准备"
+							}
+							Pt.GameCyclesRoom[gamename].ChList[k].ReadyStatus = true
+							break
+						}
+					}
+
+				}
+				//debug
+				fmt.Println("ready")
+			//如果获得房主则可以开始
+			case "start":
+				var sign bool
+				//判断自己是不是房主 是房主才能开始
+				for k := range Pt.GameCyclesRoom[gamename].ChList {
+					if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+						if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
+							//先判断是不是所有人都准备了
+							for j := range Pt.GameCyclesRoom[gamename].ChList {
+								if Pt.GameCyclesRoom[gamename].ChList[j].ReadyStatus == true {
+									continue
+								} else {
+									//标记存在未准备
+									sign = true
+									//提示还没有准备的玩家
+									for k := range Pt.GameCyclesRoom[gamename].ChList {
+										Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[j].Name + "还未准备"
+									}
+								}
+							}
+							if sign == true {
+								break
+							}
+							//全员就绪
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "比赛开始"
+							}
+							//debug
+							fmt.Println("全员已准备")
+							//---------
+						} else {
+							infoChTmp.Ch <- infoChTmp.Name + ":你不是房主，没有开始权限"
+							break
+						}
+					}
+				}
 			case "exit":
 				//debug
 				fmt.Println("exit")
@@ -179,11 +305,14 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 				//还是房主,就移交给目前0元素位的用户
 				if sign == true {
 					tmpData.ChList[0].RoomLeader = true
+					tmpData.ChList[0].ReadyStatus = true
 				}
 				Pt.GameCyclesRoom[gamename] = tmpData
-				infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
+				infoChTmp.Ch <- infoChTmp.Name + ":退出房间"
 				//debug
-				fmt.Println(tmpData.ChList[0].RoomLeader)
+				fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].RoomLeader)
+				fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].Name)
+				fmt.Println(len(Pt.GameCyclesRoom[gamename].ChList))
 				//-----------------
 				return
 			default:
@@ -202,8 +331,3 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 	return
 
 }
-
-// //RaadyCycles 准备开始
-// func ReadyCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner){
-
-// }

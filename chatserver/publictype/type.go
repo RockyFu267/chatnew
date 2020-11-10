@@ -27,6 +27,8 @@ type ClientChInfo struct {
 	//游戏专用
 	//是否可以行动
 	ActionsStatus bool `json:"actionstatus,omitempty"`
+	//准备状态
+	ReadyStatus bool `json:"readystatus,omitempty"`
 	//胜利 失败 平局
 	WinCount  int `json:"wincount,omitempty"`
 	LoseCount int `json:"losecount,omitempty"`
