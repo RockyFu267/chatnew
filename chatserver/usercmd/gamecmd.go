@@ -42,9 +42,11 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 		return
 	}
 	//正常赋值
+	infoChTmp.RoomLeader = true
 	var tmpData Pt.InfoChListStruct
 	tmpData.ChList = append(tmpData.ChList, infoChTmp)
 	tmpData.Ack = ack
+	tmpData.JoinStatus = true
 	//数值初始化--join时候需要，目前是1v1 后者加入游戏即开始,多人应加上房主标签，其他人ready状态全true，房主可以start
 	Pt.GameCyclesRoom[gamename] = tmpData
 	// infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
@@ -59,12 +61,29 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 			//debug
 			fmt.Println("exit")
 			//-----------------
-			delete(Pt.GameCyclesRoom, gamename)
-			infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
+			//如果房间只有自己 那就退出并删除房间
+			if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
+				delete(Pt.GameCyclesRoom, gamename)
+				infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
+				return
+			}
+			//否则就移交给下一个(2号)元素位的用户
+			var tmpData Pt.InfoChListStruct
+			tmpData = Pt.GameCyclesRoom[gamename]
+			tmpData.ChList = tmpData.ChList[1:]
+			tmpData.ChList[0].RoomLeader = true
+			Pt.GameCyclesRoom[gamename] = tmpData
+			infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
+			//debug
+			fmt.Println(tmpData.ChList[0].RoomLeader)
+			//-----------------
 			return
 		default:
 			//debug
 			fmt.Println("default")
+			for k := range Pt.GameCyclesRoom[gamename].ChList {
+				Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + ":" + input.Text()
+			}
 		}
 	}
 	return
@@ -114,6 +133,57 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		Pt.GameCyclesRoom[gamename] = tmpData
 
 		infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
+		for input.Scan() {
+			switch input.Text() {
+			// //准备
+			// case "ready":
+			// 	//debug
+			// 	fmt.Println("ready")
+			case "exit":
+				//debug
+				fmt.Println("exit")
+				//-----------------
+				//如果房间只有自己 那就退出并删除房间
+				if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
+					delete(Pt.GameCyclesRoom, gamename)
+					infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
+					return
+				}
+				//先判断自己是不是0号元素并且roomleader为true
+				if Pt.GameCyclesRoom[gamename].ChList[0].Name == infoChTmp.Name {
+					if Pt.GameCyclesRoom[gamename].ChList[0].RoomLeader == true {
+						//移交给下一个(2号)元素位的用户
+						var tmpData Pt.InfoChListStruct
+						tmpData = Pt.GameCyclesRoom[gamename]
+						tmpData.ChList = tmpData.ChList[1:]
+						tmpData.ChList[0].RoomLeader = true
+						Pt.GameCyclesRoom[gamename] = tmpData
+						infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
+						//debug
+						fmt.Println(tmpData.ChList[0].RoomLeader)
+						//-----------------
+						return
+					}
+				}
+				//否则就移交给下一个(2号)元素位的用户
+				var tmpData Pt.InfoChListStruct
+				tmpData = Pt.GameCyclesRoom[gamename]
+				tmpData.ChList = tmpData.ChList[1:]
+				tmpData.ChList[0].RoomLeader = true
+				Pt.GameCyclesRoom[gamename] = tmpData
+				infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
+				//debug
+				fmt.Println(tmpData.ChList[0].RoomLeader)
+				//-----------------
+				return
+			default:
+				//debug
+				fmt.Println("default")
+				for k := range Pt.GameCyclesRoom[gamename].ChList {
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + ":" + input.Text()
+				}
+			}
+		}
 		return
 	}
 
