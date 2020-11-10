@@ -78,6 +78,7 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 						sign = true
 					}
 					tmpData.ChList = append(tmpData.ChList[:k], tmpData.ChList[k+1:]...)
+					break
 				}
 			}
 			//还是房主,就移交给目前0元素位的用户
@@ -94,7 +95,7 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 			//debug
 			fmt.Println("default")
 			for k := range Pt.GameCyclesRoom[gamename].ChList {
-				Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + ":" + input.Text()
+				Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "在游戏房" + gamename + "说:" + input.Text()
 			}
 		}
 	}
@@ -172,6 +173,7 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 							sign = true
 						}
 						tmpData.ChList = append(tmpData.ChList[:k], tmpData.ChList[k+1:]...)
+						break
 					}
 				}
 				//还是房主,就移交给目前0元素位的用户
@@ -188,7 +190,7 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 				//debug
 				fmt.Println("default")
 				for k := range Pt.GameCyclesRoom[gamename].ChList {
-					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + ":" + input.Text()
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "在游戏房" + gamename + "说:" + input.Text()
 				}
 			}
 		}

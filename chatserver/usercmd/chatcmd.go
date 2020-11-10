@@ -313,7 +313,7 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		//遍历公共管道数组 公共广播
 		for k := range Pt.InfoPubChList {
 			if Pt.InfoPubChList[k].Name != "" {
-				Pt.InfoPubChList[k].Ch <- infoChTmp.Name + ": " + input.Text()
+				Pt.InfoPubChList[k].Ch <- infoChTmp.Name + "在公共房间广播说: " + input.Text()
 			}
 		}
 	}
