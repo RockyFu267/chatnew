@@ -119,6 +119,7 @@ func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		return
 	}
 	//正常赋值
+	infoChTmp.RoomLeader = true
 	var tmpData Pt.ChatGroup
 	tmpData.Name = roomname
 	tmpData.ChList = append(tmpData.ChList, infoChTmp)

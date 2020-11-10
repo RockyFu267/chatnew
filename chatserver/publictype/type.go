@@ -19,10 +19,28 @@ type ClientInfo struct {
 
 //ClientChInfo 定义管道的结构体
 type ClientChInfo struct {
-	Ch      ClientChan
-	Address string
-	Name    string
-	Friends map[string]bool
+	Ch         ClientChan
+	Address    string
+	Name       string
+	Friends    map[string]bool
+	RoomLeader bool
+	//游戏专用
+	//是否可以行动
+	ActionsStatus bool `json:"actionstatus,omitempty"`
+	//胜利 失败 平局
+	WinCount  int `json:"wincount,omitempty"`
+	LoseCount int `json:"losecount,omitempty"`
+	Draw      int `json:"draw,omitempty"`
+	//本局胜利
+	Winner int `json:"winner,omitempty"`
+	//本轮行动状态 是否已行动过
+	ActionsHistory bool `json:"actionshistory,omitempty"`
+	//德扑专用
+	//剩余筹码
+	//座次
+	//枪口加N位
+	//allin状态
+	//行为状态 --是否已经弃牌
 }
 
 //ChatGroup 定义组room的结构体
@@ -32,10 +50,12 @@ type ChatGroup struct {
 	ChList    []ClientChInfo
 }
 
-//InfoChListStruct 管道list的结构体
+//InfoChListStruct 管道list的结构体 游戏属性
 type InfoChListStruct struct {
 	Ack    string
 	ChList []ClientChInfo
+	//能否继续加入
+	JoinStatus bool
 }
 
 //InfoList 初始化tcp连接的数组 后期可以优化改map  list不用考虑并发锁的问题

@@ -45,6 +45,7 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 	var tmpData Pt.InfoChListStruct
 	tmpData.ChList = append(tmpData.ChList, infoChTmp)
 	tmpData.Ack = ack
+	//数值初始化--join时候需要，目前是1v1 后者加入游戏即开始,多人应加上房主标签，其他人ready状态全true，房主可以start
 	Pt.GameCyclesRoom[gamename] = tmpData
 	// infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"
 	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，等待对手"
@@ -57,6 +58,9 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 		case "exit":
 			//debug
 			fmt.Println("exit")
+			//-----------------
+			delete(Pt.GameCyclesRoom, gamename)
+			infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
 			return
 		default:
 			//debug
@@ -87,8 +91,8 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 				return
 			}
 		}
-		//房间人数上限
-		if len(Pt.GameCyclesRoom[gamename].ChList) >= 2 {
+		//房间人数上限或游戏中有人退出(德扑的房间存在被淘汰的玩家离场的情况)
+		if len(Pt.GameCyclesRoom[gamename].ChList) >= 2 || Pt.GameCyclesRoom[gamename].JoinStatus == false {
 			infoChTmp.Ch <- infoChTmp.Name + ":房间人数已达上限"
 			return
 		}
@@ -108,6 +112,7 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		tmpData.Ack = Pt.GameCyclesRoom[gamename].Ack
 		tmpData.ChList = append(tmpData.ChList, infoChTmp)
 		Pt.GameCyclesRoom[gamename] = tmpData
+
 		infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
 		return
 	}
