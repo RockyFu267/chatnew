@@ -55,114 +55,122 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，等待对手"
 	//进入游戏房间随时开始
 	for input.Scan() {
-		if Pt.GameCyclesRoom[gamename].GameStatus == true{
-			
-		}else{
+		if Pt.GameCyclesRoom[gamename].GameStatus == true {
+			input.Scan()
 			switch input.Text() {
-				//后期会加转让房主的功能所以这里创建者和加入者的条件判断一致
-				case "ready":
-					//判断自己是不是房主 是房主不能准备 只能开始
-					for k := range Pt.GameCyclesRoom[gamename].ChList {
-						if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
-							if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
-								infoChTmp.Ch <- infoChTmp.Name + ":你是房主，不能准备(可以在全员准备情况下开始)"
-								break
-							} else {
-								infoChTmp.Ch <- infoChTmp.Name + ":你已经准备(在全员准备情况下房主才能开始)"
-								for k := range Pt.GameCyclesRoom[gamename].ChList {
-									if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
-										continue
-									}
-									Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已准备"
+			case "1":
+				//输入1 等待比较 返回结果
+			case "2":
+			case "3":
+			default:
+				fmt.Println("无效指令")
+			}
+		} else {
+			switch input.Text() {
+			//后期会加转让房主的功能所以这里创建者和加入者的条件判断一致
+			case "ready":
+				//判断自己是不是房主 是房主不能准备 只能开始
+				for k := range Pt.GameCyclesRoom[gamename].ChList {
+					if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+						if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
+							infoChTmp.Ch <- infoChTmp.Name + ":你是房主，不能准备(可以在全员准备情况下开始)"
+							break
+						} else {
+							infoChTmp.Ch <- infoChTmp.Name + ":你已经准备(在全员准备情况下房主才能开始)"
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+									continue
 								}
-								Pt.GameCyclesRoom[gamename].ChList[k].ReadyStatus = true
-								break
+								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已准备"
 							}
-						}
-		
-					}
-					//debug
-					fmt.Println("ready")
-				//如果还是房主则可以开始
-				case "start":
-					var sign bool
-					//判断自己是不是房主 是房主才能开始
-					for k := range Pt.GameCyclesRoom[gamename].ChList {
-						if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
-							if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
-								//先判断是不是所有人都准备了
-								for j := range Pt.GameCyclesRoom[gamename].ChList {
-									if Pt.GameCyclesRoom[gamename].ChList[j].ReadyStatus == true {
-										continue
-									} else {
-										//标记存在没准备的
-										sign = true
-										//提示还没有准备的玩家
-										for k := range Pt.GameCyclesRoom[gamename].ChList {
-											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[j].Name + "还未准备"
-										}
-									}
-								}
-								if sign == true {
-									break
-								}
-								//全员就绪
-								for k := range Pt.GameCyclesRoom[gamename].ChList {
-									Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "比赛开始"
-								}
-								//debug
-								fmt.Println("全员已准备")
-								//---------
-							} else {
-								infoChTmp.Ch <- infoChTmp.Name + ":你不是房主，没有开始权限"
-								break
-							}
-						}
-					}
-				case "exit":
-					//debug
-					fmt.Println("exit")
-					//-----------------
-					//如果房间只有自己 那就退出并删除房间
-					if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
-						delete(Pt.GameCyclesRoom, gamename)
-						infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
-						return
-					}
-					var tmpData Pt.InfoChListStruct
-					tmpData = Pt.GameCyclesRoom[gamename]
-					//记录修改前的状态
-					var sign bool
-					for k := range tmpData.ChList {
-						if tmpData.ChList[k].Name == infoChTmp.Name {
-							//判断自己还是不是房主
-							if tmpData.ChList[k].RoomLeader == true {
-								sign = true
-							}
-							tmpData.ChList = append(tmpData.ChList[:k], tmpData.ChList[k+1:]...)
+							Pt.GameCyclesRoom[gamename].ChList[k].ReadyStatus = true
 							break
 						}
 					}
-					//还是房主,就移交给目前0元素位的用户
-					if sign == true {
-						tmpData.ChList[0].RoomLeader = true
-						tmpData.ChList[0].ReadyStatus = true
-					}
-					Pt.GameCyclesRoom[gamename] = tmpData
-					infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
-					//debug
-					fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].RoomLeader)
-					fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].Name)
-					fmt.Println(len(Pt.GameCyclesRoom[gamename].ChList))
-					//-----------------
-					return
-				default:
-					//debug
-					fmt.Println("default")
-					for k := range Pt.GameCyclesRoom[gamename].ChList {
-						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "在游戏房" + gamename + "说:" + input.Text()
+
+				}
+				//debug
+				fmt.Println("ready")
+			//如果还是房主则可以开始
+			case "start":
+				var sign bool
+				//判断自己是不是房主 是房主才能开始
+				for k := range Pt.GameCyclesRoom[gamename].ChList {
+					if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+						if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
+							//先判断是不是所有人都准备了
+							for j := range Pt.GameCyclesRoom[gamename].ChList {
+								if Pt.GameCyclesRoom[gamename].ChList[j].ReadyStatus == true {
+									continue
+								} else {
+									//标记存在没准备的
+									sign = true
+									//提示还没有准备的玩家
+									for k := range Pt.GameCyclesRoom[gamename].ChList {
+										Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[j].Name + "还未准备"
+									}
+								}
+							}
+							if sign == true {
+								break
+							}
+							//全员就绪
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "比赛开始"
+							}
+							//debug
+							fmt.Println("全员已准备")
+							//---------
+						} else {
+							infoChTmp.Ch <- infoChTmp.Name + ":你不是房主，没有开始权限"
+							break
+						}
 					}
 				}
+			case "exit":
+				//debug
+				fmt.Println("exit")
+				//-----------------
+				//如果房间只有自己 那就退出并删除房间
+				if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
+					delete(Pt.GameCyclesRoom, gamename)
+					infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
+					return
+				}
+				var tmpData Pt.InfoChListStruct
+				tmpData = Pt.GameCyclesRoom[gamename]
+				//记录修改前的状态
+				var sign bool
+				for k := range tmpData.ChList {
+					if tmpData.ChList[k].Name == infoChTmp.Name {
+						//判断自己还是不是房主
+						if tmpData.ChList[k].RoomLeader == true {
+							sign = true
+						}
+						tmpData.ChList = append(tmpData.ChList[:k], tmpData.ChList[k+1:]...)
+						break
+					}
+				}
+				//还是房主,就移交给目前0元素位的用户
+				if sign == true {
+					tmpData.ChList[0].RoomLeader = true
+					tmpData.ChList[0].ReadyStatus = true
+				}
+				Pt.GameCyclesRoom[gamename] = tmpData
+				infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
+				//debug
+				fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].RoomLeader)
+				fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].Name)
+				fmt.Println(len(Pt.GameCyclesRoom[gamename].ChList))
+				//-----------------
+				return
+			default:
+				//debug
+				fmt.Println("default")
+				for k := range Pt.GameCyclesRoom[gamename].ChList {
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "在游戏房" + gamename + "说:" + input.Text()
+				}
+			}
 		}
 
 	}
