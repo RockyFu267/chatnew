@@ -67,11 +67,23 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 				infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
 				return
 			}
-			//否则就移交给下一个(2号)元素位的用户
 			var tmpData Pt.InfoChListStruct
 			tmpData = Pt.GameCyclesRoom[gamename]
-			tmpData.ChList = tmpData.ChList[1:]
-			tmpData.ChList[0].RoomLeader = true
+			//记录修改前的状态
+			var sign bool
+			for k := range tmpData.ChList {
+				if tmpData.ChList[k].Name == infoChTmp.Name {
+					//判断自己还是不是房主
+					if tmpData.ChList[k].RoomLeader == true {
+						sign = true
+					}
+					tmpData.ChList = append(tmpData.ChList[:k], tmpData.ChList[k+1:]...)
+				}
+			}
+			//还是房主,就移交给目前0元素位的用户
+			if sign == true {
+				tmpData.ChList[0].RoomLeader = true
+			}
 			Pt.GameCyclesRoom[gamename] = tmpData
 			infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
 			//debug
@@ -149,27 +161,23 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 					infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
 					return
 				}
-				//先判断自己是不是0号元素并且roomleader为true
-				if Pt.GameCyclesRoom[gamename].ChList[0].Name == infoChTmp.Name {
-					if Pt.GameCyclesRoom[gamename].ChList[0].RoomLeader == true {
-						//移交给下一个(2号)元素位的用户
-						var tmpData Pt.InfoChListStruct
-						tmpData = Pt.GameCyclesRoom[gamename]
-						tmpData.ChList = tmpData.ChList[1:]
-						tmpData.ChList[0].RoomLeader = true
-						Pt.GameCyclesRoom[gamename] = tmpData
-						infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
-						//debug
-						fmt.Println(tmpData.ChList[0].RoomLeader)
-						//-----------------
-						return
-					}
-				}
-				//否则就移交给下一个(2号)元素位的用户
 				var tmpData Pt.InfoChListStruct
 				tmpData = Pt.GameCyclesRoom[gamename]
-				tmpData.ChList = tmpData.ChList[1:]
-				tmpData.ChList[0].RoomLeader = true
+				//记录修改前的状态
+				var sign bool
+				for k := range tmpData.ChList {
+					if tmpData.ChList[k].Name == infoChTmp.Name {
+						//判断自己还是不是房主
+						if tmpData.ChList[k].RoomLeader == true {
+							sign = true
+						}
+						tmpData.ChList = append(tmpData.ChList[:k], tmpData.ChList[k+1:]...)
+					}
+				}
+				//还是房主,就移交给目前0元素位的用户
+				if sign == true {
+					tmpData.ChList[0].RoomLeader = true
+				}
 				Pt.GameCyclesRoom[gamename] = tmpData
 				infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
 				//debug
