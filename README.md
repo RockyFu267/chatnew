@@ -1,6 +1,10 @@
 # chatnew
 A simple chat room
 
+## 目录结构
++ server端: 主目录/chatserver;启动命令:`go run main.go`;端口默认18000;
++ client端: client的三个目录除了连接的server地址配置不一样其他都一样；如果没有go环境,推荐直接使用根目录已编译好的客户端(压缩包里的是windows可执行文件)
+
 ## 实现的功能列表
 ### 客户端请求
 #### 准入判断
