@@ -55,7 +55,7 @@ type ChatGroup struct {
 //InfoChListStruct 管道list的结构体 游戏属性
 type InfoChListStruct struct {
 	Ack    string
-	ChList []ClientChInfo
+	ChList []*ClientChInfo
 	//能否继续加入
 	JoinStatus bool
 	//GameStatus

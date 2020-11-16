@@ -8,7 +8,9 @@ import (
 )
 
 //CreateCycles 创建石头剪刀布的房间 1v1
-func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
+func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scanner) {
+	var infoChTmp Pt.ClientChInfo
+	infoChTmp = infoChTmpData
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
 		infoChTmp.Ch <- address + ": " + "请先输入昵称"
@@ -46,7 +48,7 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 	infoChTmp.RoomLeader = true
 	infoChTmp.ReadyStatus = true
 	var tmpData Pt.InfoChListStruct
-	tmpData.ChList = append(tmpData.ChList, infoChTmp)
+	tmpData.ChList = append(tmpData.ChList, &infoChTmp)
 	tmpData.Ack = ack
 	tmpData.JoinStatus = true
 	//数值初始化--join时候需要，目前是1v1 后者加入游戏即开始,多人应加上房主标签，其他人ready状态全true，房主可以start
@@ -186,7 +188,9 @@ func CreateCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanne
 }
 
 //JoinCycles 加入房间命令
-func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
+func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scanner) {
+	var infoChTmp Pt.ClientChInfo
+	infoChTmp = infoChTmpData
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
 		infoChTmp.Ch <- address + ": " + "请先输入昵称"
@@ -232,7 +236,7 @@ func JoinCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		tmpData.ChList = Pt.GameCyclesRoom[gamename].ChList
 		tmpData.Ack = Pt.GameCyclesRoom[gamename].Ack
 		tmpData.JoinStatus = Pt.GameCyclesRoom[gamename].JoinStatus
-		tmpData.ChList = append(tmpData.ChList, infoChTmp)
+		tmpData.ChList = append(tmpData.ChList, &infoChTmp)
 		Pt.GameCyclesRoom[gamename] = tmpData
 
 		infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
