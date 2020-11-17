@@ -25,6 +25,7 @@ type ClientChInfo struct {
 	Friends    map[string]bool
 	RoomLeader bool
 	//游戏专用
+	Value string
 	//是否可以行动
 	ActionsStatus bool `json:"actionstatus,omitempty"`
 	//准备状态
@@ -60,7 +61,12 @@ type InfoChListStruct struct {
 	JoinStatus bool
 	//GameStatus
 	GameStatus bool
+	//先出手的值
+	//ActionFirst chan string
 }
+
+//TMPCyclesCh
+var TMPCyclesCh = make(chan string,1)
 
 //InfoList 初始化tcp连接的数组 后期可以优化改map  list不用考虑并发锁的问题
 var InfoList []ClientInfo

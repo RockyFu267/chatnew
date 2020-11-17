@@ -58,17 +58,265 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 	//进入游戏房间随时开始
 	for input.Scan() {
 		if Pt.GameCyclesRoom[gamename].GameStatus == true {
-			switch input.Text() {
-			case "1":
-				//输入1 等待比较 返回结果
-				fmt.Println("无效指令1")
-			case "2":
-				fmt.Println("无效指令2")
-			case "3":
-				fmt.Println("无效指令3")
-			default:
-				fmt.Println("无效指令")
+			if infoChTmp.ActionsHistory == false && infoChTmp.ActionsStatus == true {
+				switch input.Text() {
+				case "1":
+					infoChTmp.Value = "1"
+					strPlay1 := TypeNameRes(infoChTmp.Value)
+					//输入1 等待比较 返回结果
+					//判断对方是否已经输入
+					if len(Pt.TMPCyclesCh) == 1 {
+						for k := range Pt.GameCyclesRoom[gamename].ChList {
+							//找到对手的指针
+							if Pt.GameCyclesRoom[gamename].ChList[k].Name != infoChTmp.Name {
+								//先赋值对手的值
+								Pt.GameCyclesRoom[gamename].ChList[k].Value = <-Pt.TMPCyclesCh
+								strPlay2 := TypeNameRes(Pt.GameCyclesRoom[gamename].ChList[k].Value)
+								//先比大小然后输出结果
+								res := JudgeRes(&infoChTmp, Pt.GameCyclesRoom[gamename].ChList[k])
+								if len(res) > 1 {
+									fmt.Println("双方平局")
+									for k := range Pt.GameCyclesRoom[gamename].ChList {
+										Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+										Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "双方平局"
+									}
+									//初始化
+									infoChTmp.ActionsHistory = false
+									infoChTmp.ActionsStatus = true
+									infoChTmp.Draw = infoChTmp.Draw + 1
+									Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+									Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+									Pt.GameCyclesRoom[gamename].ChList[k].Draw = Pt.GameCyclesRoom[gamename].ChList[k].Draw + 1
+									//跳出循环
+									break
+								} else {
+									fmt.Println("winner is " + res[0].Name)
+									if res[0].Name == infoChTmp.Name {
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.WinCount = infoChTmp.WinCount + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = Pt.GameCyclesRoom[gamename].ChList[k].LoseCount + 1
+										//跳出循环
+										break
+									} else {
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.LoseCount = infoChTmp.LoseCount + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].WinCount = Pt.GameCyclesRoom[gamename].ChList[k].WinCount + 1
+										//跳出循环
+										break
+									}
+								}
+							}
+
+						}
+						//这里之后应该加入sign 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+						continue
+						//更新所有玩家状态以及初始化房间
+					} else {
+						infoChTmp.Value = "1"
+						strPlay1 := TypeNameRes(infoChTmp.Value)
+						Pt.TMPCyclesCh <- infoChTmp.Value
+						//对方没输入
+						infoChTmp.Ch <- infoChTmp.Name + ":你选择出" + strPlay1 + " 等待对手做出决定"
+						for k := range Pt.GameCyclesRoom[gamename].ChList {
+							if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+								continue
+							}
+							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已做出决定,请你选择"
+						}
+						infoChTmp.ActionsHistory = true
+						infoChTmp.ActionsStatus = false
+					}
+					fmt.Println("11111111111")
+				case "2":
+					infoChTmp.Value = "2"
+					strPlay1 := TypeNameRes(infoChTmp.Value)
+					//输入1 等待比较 返回结果
+					//判断对方是否已经输入
+					if len(Pt.TMPCyclesCh) == 1 {
+						for k := range Pt.GameCyclesRoom[gamename].ChList {
+							//找到对手的指针
+							if Pt.GameCyclesRoom[gamename].ChList[k].Name != infoChTmp.Name {
+								//先赋值对手的值
+								Pt.GameCyclesRoom[gamename].ChList[k].Value = <-Pt.TMPCyclesCh
+								strPlay2 := TypeNameRes(Pt.GameCyclesRoom[gamename].ChList[k].Value)
+								//先比大小然后输出结果
+								res := JudgeRes(&infoChTmp, Pt.GameCyclesRoom[gamename].ChList[k])
+								if len(res) > 1 {
+									fmt.Println("双方平局")
+									for k := range Pt.GameCyclesRoom[gamename].ChList {
+										Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+										Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "双方平局"
+									}
+									//初始化
+									infoChTmp.ActionsHistory = false
+									infoChTmp.ActionsStatus = true
+									infoChTmp.Draw = infoChTmp.Draw + 1
+									Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+									Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+									Pt.GameCyclesRoom[gamename].ChList[k].Draw = Pt.GameCyclesRoom[gamename].ChList[k].Draw + 1
+									//跳出循环
+									break
+								} else {
+									fmt.Println("winner is " + res[0].Name)
+									if res[0].Name == infoChTmp.Name {
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.WinCount = infoChTmp.WinCount + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = Pt.GameCyclesRoom[gamename].ChList[k].LoseCount + 1
+										//跳出循环
+										break
+									} else {
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.LoseCount = infoChTmp.LoseCount + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].WinCount = Pt.GameCyclesRoom[gamename].ChList[k].WinCount + 1
+										//跳出循环
+										break
+									}
+								}
+							}
+
+						}
+						//这里之后应该加入sign 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+						continue
+						//更新所有玩家状态以及初始化房间
+					} else {
+						infoChTmp.Value = "2"
+						strPlay1 := TypeNameRes(infoChTmp.Value)
+						Pt.TMPCyclesCh <- infoChTmp.Value
+						//对方没输入
+						infoChTmp.Ch <- infoChTmp.Name + ":你选择出" + strPlay1 + " 等待对手做出决定"
+						for k := range Pt.GameCyclesRoom[gamename].ChList {
+							if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+								continue
+							}
+							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已做出决定,请你选择"
+						}
+						infoChTmp.ActionsHistory = true
+						infoChTmp.ActionsStatus = false
+					}
+					fmt.Println("22222222222")
+				case "3":
+					infoChTmp.Value = "3"
+					strPlay1 := TypeNameRes(infoChTmp.Value)
+					//输入1 等待比较 返回结果
+					//判断对方是否已经输入
+					if len(Pt.TMPCyclesCh) == 1 {
+						for k := range Pt.GameCyclesRoom[gamename].ChList {
+							//找到对手的指针
+							if Pt.GameCyclesRoom[gamename].ChList[k].Name != infoChTmp.Name {
+								//先赋值对手的值
+								Pt.GameCyclesRoom[gamename].ChList[k].Value = <-Pt.TMPCyclesCh
+								strPlay2 := TypeNameRes(Pt.GameCyclesRoom[gamename].ChList[k].Value)
+								//先比大小然后输出结果
+								res := JudgeRes(&infoChTmp, Pt.GameCyclesRoom[gamename].ChList[k])
+								if len(res) > 1 {
+									fmt.Println("双方平局")
+									for k := range Pt.GameCyclesRoom[gamename].ChList {
+										Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+										Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "双方平局"
+									}
+									//初始化
+									infoChTmp.ActionsHistory = false
+									infoChTmp.ActionsStatus = true
+									infoChTmp.Draw = infoChTmp.Draw + 1
+									Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+									Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+									Pt.GameCyclesRoom[gamename].ChList[k].Draw = Pt.GameCyclesRoom[gamename].ChList[k].Draw + 1
+									//跳出循环
+									break
+								} else {
+									fmt.Println("winner is " + res[0].Name)
+									if res[0].Name == infoChTmp.Name {
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.WinCount = infoChTmp.WinCount + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = Pt.GameCyclesRoom[gamename].ChList[k].LoseCount + 1
+										//跳出循环
+										break
+									} else {
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.LoseCount = infoChTmp.LoseCount + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].WinCount = Pt.GameCyclesRoom[gamename].ChList[k].WinCount + 1
+										//跳出循环
+										break
+									}
+								}
+							}
+
+						}
+						//这里之后应该加入sign 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+						continue
+						//更新所有玩家状态以及初始化房间
+					} else {
+						infoChTmp.Value = "3"
+						strPlay1 := TypeNameRes(infoChTmp.Value)
+						Pt.TMPCyclesCh <- infoChTmp.Value
+						//对方没输入
+						infoChTmp.Ch <- infoChTmp.Name + ":你选择出" + strPlay1 + " 等待对手做出决定"
+						for k := range Pt.GameCyclesRoom[gamename].ChList {
+							if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+								continue
+							}
+							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已做出决定,请你选择"
+						}
+						infoChTmp.ActionsHistory = true
+						infoChTmp.ActionsStatus = false
+					}
+					fmt.Println("11111111111")
+				default:
+					fmt.Println("无效指令")
+				}
+			} else {
+				//这里之后应该加入判断 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+				infoChTmp.Ch <- infoChTmp.Name + ":等待对手做出决定"
 			}
+
 		} else {
 			switch input.Text() {
 			//后期会加转让房主的功能所以这里创建者和加入者的条件判断一致
@@ -88,6 +336,9 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已准备"
 							}
 							Pt.GameCyclesRoom[gamename].ChList[k].ReadyStatus = true
+							//更改选手状态
+							infoChTmp.ActionsHistory = false
+							infoChTmp.ActionsStatus = true
 							break
 						}
 					}
@@ -122,6 +373,9 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 							tmpstruct := Pt.GameCyclesRoom[gamename]
 							tmpstruct.GameStatus = true
 							Pt.GameCyclesRoom[gamename] = tmpstruct
+							//更改选手状态
+							infoChTmp.ActionsHistory = false
+							infoChTmp.ActionsStatus = true
 							//全员就绪
 							for k := range Pt.GameCyclesRoom[gamename].ChList {
 								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "比赛开始"
@@ -243,17 +497,265 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 		//进入游戏房间随时开始
 		for input.Scan() {
 			if Pt.GameCyclesRoom[gamename].GameStatus == true {
-				switch input.Text() {
-				case "1":
-					//输入1 等待比较 返回结果
-					fmt.Println("无效指令1")
-				case "2":
-					fmt.Println("无效指令2")
-				case "3":
-					fmt.Println("无效指令3")
-				default:
-					fmt.Println("无效指令")
+				if infoChTmp.ActionsHistory == false && infoChTmp.ActionsStatus == true {
+					switch input.Text() {
+					case "1":
+						infoChTmp.Value = "1"
+						strPlay1 := TypeNameRes(infoChTmp.Value)
+						//输入1 等待比较 返回结果
+						//判断对方是否已经输入
+						if len(Pt.TMPCyclesCh) == 1 {
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								//找到对手的指针
+								if Pt.GameCyclesRoom[gamename].ChList[k].Name != infoChTmp.Name {
+									//先赋值对手的值
+									Pt.GameCyclesRoom[gamename].ChList[k].Value = <-Pt.TMPCyclesCh
+									strPlay2 := TypeNameRes(Pt.GameCyclesRoom[gamename].ChList[k].Value)
+									//先比大小然后输出结果
+									res := JudgeRes(&infoChTmp, Pt.GameCyclesRoom[gamename].ChList[k])
+									if len(res) > 1 {
+										fmt.Println("双方平局")
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "双方平局"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.Draw = infoChTmp.Draw + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].Draw = Pt.GameCyclesRoom[gamename].ChList[k].Draw + 1
+										//跳出循环
+										break
+									} else {
+										fmt.Println("winner is " + res[0].Name)
+										if res[0].Name == infoChTmp.Name {
+											for k := range Pt.GameCyclesRoom[gamename].ChList {
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											}
+											//初始化
+											infoChTmp.ActionsHistory = false
+											infoChTmp.ActionsStatus = true
+											infoChTmp.WinCount = infoChTmp.WinCount + 1
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+											Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = Pt.GameCyclesRoom[gamename].ChList[k].LoseCount + 1
+											//跳出循环
+											break
+										} else {
+											for k := range Pt.GameCyclesRoom[gamename].ChList {
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											}
+											//初始化
+											infoChTmp.ActionsHistory = false
+											infoChTmp.ActionsStatus = true
+											infoChTmp.LoseCount = infoChTmp.LoseCount + 1
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+											Pt.GameCyclesRoom[gamename].ChList[k].WinCount = Pt.GameCyclesRoom[gamename].ChList[k].WinCount + 1
+											//跳出循环
+											break
+										}
+									}
+								}
+
+							}
+							//这里之后应该加入sign 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+							continue
+							//更新所有玩家状态以及初始化房间
+						} else {
+							infoChTmp.Value = "1"
+							strPlay1 := TypeNameRes(infoChTmp.Value)
+							Pt.TMPCyclesCh <- infoChTmp.Value
+							//对方没输入
+							infoChTmp.Ch <- infoChTmp.Name + ":你选择出" + strPlay1 + " 等待对手做出决定"
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+									continue
+								}
+								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已做出决定,请你选择"
+							}
+							infoChTmp.ActionsHistory = true
+							infoChTmp.ActionsStatus = false
+						}
+						fmt.Println("11111111111")
+					case "2":
+						infoChTmp.Value = "2"
+						strPlay1 := TypeNameRes(infoChTmp.Value)
+						//输入1 等待比较 返回结果
+						//判断对方是否已经输入
+						if len(Pt.TMPCyclesCh) == 1 {
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								//找到对手的指针
+								if Pt.GameCyclesRoom[gamename].ChList[k].Name != infoChTmp.Name {
+									//先赋值对手的值
+									Pt.GameCyclesRoom[gamename].ChList[k].Value = <-Pt.TMPCyclesCh
+									strPlay2 := TypeNameRes(Pt.GameCyclesRoom[gamename].ChList[k].Value)
+									//先比大小然后输出结果
+									res := JudgeRes(&infoChTmp, Pt.GameCyclesRoom[gamename].ChList[k])
+									if len(res) > 1 {
+										fmt.Println("双方平局")
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "双方平局"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.Draw = infoChTmp.Draw + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].Draw = Pt.GameCyclesRoom[gamename].ChList[k].Draw + 1
+										//跳出循环
+										break
+									} else {
+										fmt.Println("winner is " + res[0].Name)
+										if res[0].Name == infoChTmp.Name {
+											for k := range Pt.GameCyclesRoom[gamename].ChList {
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											}
+											//初始化
+											infoChTmp.ActionsHistory = false
+											infoChTmp.ActionsStatus = true
+											infoChTmp.WinCount = infoChTmp.WinCount + 1
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+											Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = Pt.GameCyclesRoom[gamename].ChList[k].LoseCount + 1
+											//跳出循环
+											break
+										} else {
+											for k := range Pt.GameCyclesRoom[gamename].ChList {
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											}
+											//初始化
+											infoChTmp.ActionsHistory = false
+											infoChTmp.ActionsStatus = true
+											infoChTmp.LoseCount = infoChTmp.LoseCount + 1
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+											Pt.GameCyclesRoom[gamename].ChList[k].WinCount = Pt.GameCyclesRoom[gamename].ChList[k].WinCount + 1
+											//跳出循环
+											break
+										}
+									}
+								}
+
+							}
+							//这里之后应该加入sign 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+							continue
+							//更新所有玩家状态以及初始化房间
+						} else {
+							infoChTmp.Value = "2"
+							strPlay1 := TypeNameRes(infoChTmp.Value)
+							Pt.TMPCyclesCh <- infoChTmp.Value
+							//对方没输入
+							infoChTmp.Ch <- infoChTmp.Name + ":你选择出" + strPlay1 + " 等待对手做出决定"
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+									continue
+								}
+								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已做出决定,请你选择"
+							}
+							infoChTmp.ActionsHistory = true
+							infoChTmp.ActionsStatus = false
+						}
+						fmt.Println("22222222222")
+					case "3":
+						infoChTmp.Value = "3"
+						strPlay1 := TypeNameRes(infoChTmp.Value)
+						//输入1 等待比较 返回结果
+						//判断对方是否已经输入
+						if len(Pt.TMPCyclesCh) == 1 {
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								//找到对手的指针
+								if Pt.GameCyclesRoom[gamename].ChList[k].Name != infoChTmp.Name {
+									//先赋值对手的值
+									Pt.GameCyclesRoom[gamename].ChList[k].Value = <-Pt.TMPCyclesCh
+									strPlay2 := TypeNameRes(Pt.GameCyclesRoom[gamename].ChList[k].Value)
+									//先比大小然后输出结果
+									res := JudgeRes(&infoChTmp, Pt.GameCyclesRoom[gamename].ChList[k])
+									if len(res) > 1 {
+										fmt.Println("双方平局")
+										for k := range Pt.GameCyclesRoom[gamename].ChList {
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "双方平局"
+										}
+										//初始化
+										infoChTmp.ActionsHistory = false
+										infoChTmp.ActionsStatus = true
+										infoChTmp.Draw = infoChTmp.Draw + 1
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+										Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+										Pt.GameCyclesRoom[gamename].ChList[k].Draw = Pt.GameCyclesRoom[gamename].ChList[k].Draw + 1
+										//跳出循环
+										break
+									} else {
+										fmt.Println("winner is " + res[0].Name)
+										if res[0].Name == infoChTmp.Name {
+											for k := range Pt.GameCyclesRoom[gamename].ChList {
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											}
+											//初始化
+											infoChTmp.ActionsHistory = false
+											infoChTmp.ActionsStatus = true
+											infoChTmp.WinCount = infoChTmp.WinCount + 1
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+											Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = Pt.GameCyclesRoom[gamename].ChList[k].LoseCount + 1
+											//跳出循环
+											break
+										} else {
+											for k := range Pt.GameCyclesRoom[gamename].ChList {
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											}
+											//初始化
+											infoChTmp.ActionsHistory = false
+											infoChTmp.ActionsStatus = true
+											infoChTmp.LoseCount = infoChTmp.LoseCount + 1
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+											Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+											Pt.GameCyclesRoom[gamename].ChList[k].WinCount = Pt.GameCyclesRoom[gamename].ChList[k].WinCount + 1
+											//跳出循环
+											break
+										}
+									}
+								}
+
+							}
+							//这里之后应该加入sign 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+							continue
+							//更新所有玩家状态以及初始化房间
+						} else {
+							infoChTmp.Value = "3"
+							strPlay1 := TypeNameRes(infoChTmp.Value)
+							Pt.TMPCyclesCh <- infoChTmp.Value
+							//对方没输入
+							infoChTmp.Ch <- infoChTmp.Name + ":你选择出" + strPlay1 + " 等待对手做出决定"
+							for k := range Pt.GameCyclesRoom[gamename].ChList {
+								if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+									continue
+								}
+								Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已做出决定,请你选择"
+							}
+							infoChTmp.ActionsHistory = true
+							infoChTmp.ActionsStatus = false
+						}
+						fmt.Println("11111111111")
+					default:
+						fmt.Println("无效指令")
+					}
+				} else {
+					//这里之后应该加入判断 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+					infoChTmp.Ch <- infoChTmp.Name + ":等待对手做出决定"
 				}
+
 			} else {
 				switch input.Text() {
 				//准备
@@ -273,6 +775,9 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 									Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "已准备"
 								}
 								Pt.GameCyclesRoom[gamename].ChList[k].ReadyStatus = true
+								//更改选手状态
+								infoChTmp.ActionsHistory = false
+								infoChTmp.ActionsStatus = true
 								break
 							}
 						}
@@ -307,6 +812,9 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 								tmpstruct := Pt.GameCyclesRoom[gamename]
 								tmpstruct.GameStatus = true
 								Pt.GameCyclesRoom[gamename] = tmpstruct
+								//更改选手状态
+								infoChTmp.ActionsHistory = false
+								infoChTmp.ActionsStatus = true
 								//全员就绪
 								for k := range Pt.GameCyclesRoom[gamename].ChList {
 									Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "比赛开始"
