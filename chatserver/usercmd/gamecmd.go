@@ -5,6 +5,7 @@ import (
 	Pf "chatserver/publicfunc"
 	Pt "chatserver/publictype"
 	"fmt"
+	"strconv"
 )
 
 //CreateCycles 创建石头剪刀布的房间 1v1
@@ -91,10 +92,13 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 									break
 								} else {
 									fmt.Println("winner is " + res[0].Name)
+									fmt.Println("winner issssss " + infoChTmp.Name)
 									if res[0].Name == infoChTmp.Name {
 										for k := range Pt.GameCyclesRoom[gamename].ChList {
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 										}
 										//初始化
 										infoChTmp.ActionsHistory = false
@@ -108,7 +112,10 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 									} else {
 										for k := range Pt.GameCyclesRoom[gamename].ChList {
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+
 										}
 										//初始化
 										infoChTmp.ActionsHistory = false
@@ -174,10 +181,13 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 									break
 								} else {
 									fmt.Println("winner is " + res[0].Name)
+									fmt.Println("winner issssss " + infoChTmp.Name)
 									if res[0].Name == infoChTmp.Name {
 										for k := range Pt.GameCyclesRoom[gamename].ChList {
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 										}
 										//初始化
 										infoChTmp.ActionsHistory = false
@@ -191,7 +201,10 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 									} else {
 										for k := range Pt.GameCyclesRoom[gamename].ChList {
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+
 										}
 										//初始化
 										infoChTmp.ActionsHistory = false
@@ -257,10 +270,13 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 									break
 								} else {
 									fmt.Println("winner is " + res[0].Name)
+									fmt.Println("winner issssss " + infoChTmp.Name)
 									if res[0].Name == infoChTmp.Name {
 										for k := range Pt.GameCyclesRoom[gamename].ChList {
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 										}
 										//初始化
 										infoChTmp.ActionsHistory = false
@@ -274,7 +290,10 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 									} else {
 										for k := range Pt.GameCyclesRoom[gamename].ChList {
 											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+											Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+
 										}
 										//初始化
 										infoChTmp.ActionsHistory = false
@@ -530,10 +549,13 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 										break
 									} else {
 										fmt.Println("winner is " + res[0].Name)
+										fmt.Println("winner issssss " + infoChTmp.Name)
 										if res[0].Name == infoChTmp.Name {
 											for k := range Pt.GameCyclesRoom[gamename].ChList {
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 											}
 											//初始化
 											infoChTmp.ActionsHistory = false
@@ -547,7 +569,10 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 										} else {
 											for k := range Pt.GameCyclesRoom[gamename].ChList {
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+
 											}
 											//初始化
 											infoChTmp.ActionsHistory = false
@@ -613,10 +638,13 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 										break
 									} else {
 										fmt.Println("winner is " + res[0].Name)
+										fmt.Println("winner issssss " + infoChTmp.Name)
 										if res[0].Name == infoChTmp.Name {
 											for k := range Pt.GameCyclesRoom[gamename].ChList {
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 											}
 											//初始化
 											infoChTmp.ActionsHistory = false
@@ -630,7 +658,10 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 										} else {
 											for k := range Pt.GameCyclesRoom[gamename].ChList {
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+
 											}
 											//初始化
 											infoChTmp.ActionsHistory = false
@@ -696,10 +727,13 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 										break
 									} else {
 										fmt.Println("winner is " + res[0].Name)
+										fmt.Println("winner issssss " + infoChTmp.Name)
 										if res[0].Name == infoChTmp.Name {
 											for k := range Pt.GameCyclesRoom[gamename].ChList {
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 											}
 											//初始化
 											infoChTmp.ActionsHistory = false
@@ -713,7 +747,10 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 										} else {
 											for k := range Pt.GameCyclesRoom[gamename].ChList {
 												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+												Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+
 											}
 											//初始化
 											infoChTmp.ActionsHistory = false
