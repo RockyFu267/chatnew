@@ -91,6 +91,7 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 					GameCycles(&infoChTmp, "3", gamename)
 				default:
 					fmt.Println("无效指令")
+					infoChTmp.Ch <- infoChTmp.Name + "无效指令"
 				}
 			} else {
 				//这里之后应该加入判断 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
@@ -128,6 +129,10 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 				fmt.Println("ready")
 			//如果还是房主则可以开始
 			case "start":
+				if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
+					infoChTmp.Ch <- infoChTmp.Name + ":等待对手加入房间"
+					continue
+				}
 				var sign bool
 				//判断自己是不是房主 是房主才能开始
 				for k := range Pt.GameCyclesRoom[gamename].ChList {
@@ -302,6 +307,11 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 				//正常赋值
 				infoChTmp.RoomLeader = true
 				infoChTmp.ReadyStatus = true
+				infoChTmp.WinCount = 0
+				infoChTmp.LoseCount = 0
+				infoChTmp.Draw = 0
+				infoChTmp.ActionsHistory = false
+				infoChTmp.ActionsStatus = true
 				var tmpDataTMP Pt.InfoChListStruct
 				tmpDataTMP.ChList = append(tmpDataTMP.ChList, &infoChTmp)
 				tmpDataTMP.Ack = ack
@@ -321,6 +331,7 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 						GameCycles(&infoChTmp, "3", gamename)
 					default:
 						fmt.Println("无效指令")
+						infoChTmp.Ch <- infoChTmp.Name + "无效指令"
 					}
 				} else {
 					//这里之后应该加入判断 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
@@ -358,6 +369,10 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 					fmt.Println("ready")
 				//如果获得房主则可以开始
 				case "start":
+					if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
+						infoChTmp.Ch <- infoChTmp.Name + ":等待对手加入房间"
+						continue
+					}
 					var sign bool
 					//判断自己是不是房主 是房主才能开始
 					for k := range Pt.GameCyclesRoom[gamename].ChList {
