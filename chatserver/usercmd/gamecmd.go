@@ -60,6 +60,9 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，等待对手"
 	//进入游戏房间随时开始
 	for input.Scan() {
+		//发送心跳给最外层 以及房间的管道
+		//判断对方是否已经断开连接
+
 		if Pt.GameCyclesRoom[gamename].GameStatus == true {
 			if infoChTmp.ActionsHistory == false && infoChTmp.ActionsStatus == true {
 				switch input.Text() {

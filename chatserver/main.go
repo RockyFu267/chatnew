@@ -88,11 +88,12 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	Pt.Entering <- ch
 
 	input := bufio.NewScanner(tmpinfo.ConnChan)
+	chScanTurnBool := make(chan bool)
 	chScanCloseBool := make(chan bool)
 	go func() {
 		//循环用户输入
 		for input.Scan() {
-			Pt.ChScanTurnBool <- true
+			chScanTurnBool <- true
 			switch input.Text() {
 			//昵称命令
 			case "myname":
@@ -128,13 +129,13 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 	}()
 	for {
 		select {
-		case <-Pt.ChScanTurnBool:
+		case <-chScanTurnBool:
 		case <-chScanCloseBool:
 			Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + "has left"
 			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "主动断开连接")
 			Cf.DeleteConn(infoChTmp, ch, tmpinfo)
 			return
-		case <-time.After(time.Duration(1800 * time.Second)):
+		case <-time.After(time.Duration(10 * time.Second)):
 			Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + "timeout has left"
 			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "超时断开连接")
 			Cf.DeleteConn(infoChTmp, ch, tmpinfo)
