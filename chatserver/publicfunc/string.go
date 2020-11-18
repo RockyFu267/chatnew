@@ -57,9 +57,11 @@ func StringToDestinationContent(input string) (output string) {
 func Helpstring() string {
 	return (`
 	please choose options:
-		- addfriends : 添加好友 
+		- addfriends : 添加好友
+		- createcycles : 创建1v1石头剪刀布的battle房间 
 		- createroom : 创建房间
 		- delfriends : 删除好友
+		- joincycles   : 加入1v1石头剪刀布的battle房间 
 		- joinroom   : 加入房间
 		- listroom   : 获取所有房间号
 		- listuser   : 获取所有在线用户Name
