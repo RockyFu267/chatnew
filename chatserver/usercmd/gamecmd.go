@@ -62,11 +62,16 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 	for input.Scan() {
 		//发送心跳给最外层 以及房间的管道
 		//判断对方是否已经断开连接
-		if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
+		if len(Pt.GameCyclesRoom[gamename].ChList) == 1 && Pt.GameCyclesRoom[gamename].ConnectBroken == true {
 			infoChTmp.Ch <- infoChTmp.Name + ":对手断开连接，你赢了"
 			//正常赋值
 			infoChTmp.RoomLeader = true
 			infoChTmp.ReadyStatus = true
+			infoChTmp.WinCount = 0
+			infoChTmp.LoseCount = 0
+			infoChTmp.Draw = 0
+			infoChTmp.ActionsHistory = false
+			infoChTmp.ActionsStatus = true
 			var tmpDataTMP Pt.InfoChListStruct
 			tmpDataTMP.ChList = append(tmpDataTMP.ChList, &infoChTmp)
 			tmpDataTMP.Ack = ack
@@ -214,13 +219,12 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 	//主动或被动断开连接退出房间或者直接判负
 	//wait
 	//自己断线 重新赋值
-	infoChTmp.RoomLeader = true
-	infoChTmp.ReadyStatus = true
 	var tmpDataTMP Pt.InfoChListStruct
 	tmpDataTMP.ChList = Pt.GameCyclesRoom[gamename].ChList
 	tmpDataTMP.Ack = ack
 	tmpDataTMP.JoinStatus = true
 	tmpDataTMP.GameStatus = false
+	tmpDataTMP.ConnectBroken = true
 	for k := range tmpDataTMP.ChList {
 		if tmpDataTMP.ChList[k].Name == infoChTmp.Name {
 			tmpDataTMP.ChList = append(tmpDataTMP.ChList[:k], tmpDataTMP.ChList[(k+1):]...)
@@ -228,6 +232,11 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 		}
 	}
 	Pt.GameCyclesRoom[gamename] = tmpDataTMP
+	//如果房间只有自己 那就退出并删除房间
+	if len(Pt.GameCyclesRoom[gamename].ChList) == 0 {
+		delete(Pt.GameCyclesRoom, gamename)
+		return
+	}
 	return
 }
 
@@ -288,7 +297,7 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 		for input.Scan() {
 			//发送心跳给最外层 以及房间的管道
 			//判断对方是否已经断开连接
-			if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
+			if len(Pt.GameCyclesRoom[gamename].ChList) == 1 && Pt.GameCyclesRoom[gamename].ConnectBroken == true {
 				infoChTmp.Ch <- infoChTmp.Name + ":对手断开连接，你赢了"
 				//正常赋值
 				infoChTmp.RoomLeader = true
@@ -439,13 +448,12 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 		//主动或被动断开连接退出房间或者直接判负
 		//wait
 		//自己断线 重新赋值
-		infoChTmp.RoomLeader = true
-		infoChTmp.ReadyStatus = true
 		var tmpDataTMP Pt.InfoChListStruct
 		tmpDataTMP.ChList = Pt.GameCyclesRoom[gamename].ChList
 		tmpDataTMP.Ack = ack
 		tmpDataTMP.JoinStatus = true
 		tmpDataTMP.GameStatus = false
+		tmpDataTMP.ConnectBroken = true
 		for k := range tmpDataTMP.ChList {
 			if tmpDataTMP.ChList[k].Name == infoChTmp.Name {
 				tmpDataTMP.ChList = append(tmpDataTMP.ChList[:k], tmpDataTMP.ChList[(k+1):]...)
@@ -453,6 +461,11 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 			}
 		}
 		Pt.GameCyclesRoom[gamename] = tmpDataTMP
+		//如果房间只有自己 那就退出并删除房间
+		if len(Pt.GameCyclesRoom[gamename].ChList) == 0 {
+			delete(Pt.GameCyclesRoom, gamename)
+			return
+		}
 		return
 	}
 

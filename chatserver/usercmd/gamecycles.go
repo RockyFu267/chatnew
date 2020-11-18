@@ -38,13 +38,13 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 						}
 						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "双方平局"
-						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 					}
 					infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 					infoChTmp.Ch <- "双方平局"
-					infoChTmp.Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-					infoChTmp.Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+					infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+					infoChTmp.Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 					//跳出循环
 					return
 				}
@@ -64,13 +64,13 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 						}
 						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
-						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 					}
 					infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 					infoChTmp.Ch <- infoChTmp.Name + "胜利"
-					infoChTmp.Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-					infoChTmp.Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+					infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+					infoChTmp.Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 					//跳出循环
 					return
 				}
@@ -87,14 +87,14 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 					}
 					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
-					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 
 				}
 				infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 				infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
-				infoChTmp.Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-				infoChTmp.Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+				infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+				infoChTmp.Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 
 				//跳出循环
 				return
@@ -106,19 +106,6 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 		return
 		//更新所有玩家状态以及初始化房间
 	}
-	// if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
-	// 	infoChTmp.Ch <- infoChTmp.Name + ":对手断开连接，你赢了"
-	// 	//正常赋值
-	// 	infoChTmp.RoomLeader = true
-	// 	infoChTmp.ReadyStatus = true
-	// 	var tmpDataTMP Pt.InfoChListStruct
-	// 	tmpDataTMP.ChList = append(tmpDataTMP.ChList, infoChTmp)
-	// 	tmpDataTMP.Ack = Pt.GameCyclesRoom[gamename].Ack
-	// 	tmpDataTMP.JoinStatus = true
-	// 	tmpDataTMP.GameStatus = false
-	// 	Pt.GameCyclesRoom[gamename] = tmpDataTMP
-	// 	return
-	// }
 	infoChTmp.Value = input
 	strPlay1TMP := TypeNameRes(infoChTmp.Value)
 	Pt.CyclesRoomChMap["cycles"+gamename] <- infoChTmp.Value

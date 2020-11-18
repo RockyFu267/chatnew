@@ -26,7 +26,7 @@ type ClientChInfo struct {
 	RoomLeader bool
 	//游戏专用
 	Value string
-	//是否可以行动
+	//是否可以行动 true 可以行动
 	ActionsStatus bool `json:"actionstatus,omitempty"`
 	//准备状态
 	ReadyStatus bool `json:"readystatus,omitempty"`
@@ -36,7 +36,7 @@ type ClientChInfo struct {
 	Draw      int `json:"draw,omitempty"`
 	//本局胜利
 	Winner int `json:"winner,omitempty"`
-	//本轮行动状态 是否已行动过
+	//本轮行动状态 是否已行动过  true 行动过了
 	ActionsHistory bool `json:"actionshistory,omitempty"`
 	//德扑专用
 	//剩余筹码
