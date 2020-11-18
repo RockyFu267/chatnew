@@ -66,7 +66,7 @@ type InfoChListStruct struct {
 }
 
 //TMPCyclesCh
-var TMPCyclesCh = make(chan string,1)
+var TMPCyclesCh = make(chan string, 1)
 
 //InfoList 初始化tcp连接的数组 后期可以优化改map  list不用考虑并发锁的问题
 var InfoList []ClientInfo
