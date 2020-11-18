@@ -61,6 +61,8 @@ type InfoChListStruct struct {
 	JoinStatus bool
 	//GameStatus
 	GameStatus bool
+	//对手是否是掉线
+	ConnectBroken bool
 	//先出手的值
 	//ActionFirst chan string
 }
@@ -70,9 +72,6 @@ var TMPCyclesCh = make(chan string, 1)
 
 //CyclesRoomChMap 石头剪刀布的管道
 var CyclesRoomChMap = make(map[string]chan string, 1)
-
-//ChScanTurnBool 最外层心跳接收
-var ChScanTurnBool = make(chan bool)
 
 //InfoList 初始化tcp连接的数组 后期可以优化改map  list不用考虑并发锁的问题
 var InfoList []ClientInfo

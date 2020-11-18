@@ -12,7 +12,7 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 	infoChTmp.Value = input
 	strPlay1 := TypeNameRes(infoChTmp.Value)
 	//输入1 等待比较 返回结果
-	//判断对方是否已经输入
+	//判断对方是否已经输入 取房间管道的值长度
 	if len(Pt.CyclesRoomChMap["cycles"+gamename]) == 1 {
 		for k := range Pt.GameCyclesRoom[gamename].ChList {
 			//找到对手的指针
@@ -106,6 +106,19 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 		return
 		//更新所有玩家状态以及初始化房间
 	}
+	// if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
+	// 	infoChTmp.Ch <- infoChTmp.Name + ":对手断开连接，你赢了"
+	// 	//正常赋值
+	// 	infoChTmp.RoomLeader = true
+	// 	infoChTmp.ReadyStatus = true
+	// 	var tmpDataTMP Pt.InfoChListStruct
+	// 	tmpDataTMP.ChList = append(tmpDataTMP.ChList, infoChTmp)
+	// 	tmpDataTMP.Ack = Pt.GameCyclesRoom[gamename].Ack
+	// 	tmpDataTMP.JoinStatus = true
+	// 	tmpDataTMP.GameStatus = false
+	// 	Pt.GameCyclesRoom[gamename] = tmpDataTMP
+	// 	return
+	// }
 	infoChTmp.Value = input
 	strPlay1TMP := TypeNameRes(infoChTmp.Value)
 	Pt.CyclesRoomChMap["cycles"+gamename] <- infoChTmp.Value
@@ -128,6 +141,7 @@ func ReadyCycles(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner
 
 }
 
+//TypeNameRes 翻译结果
 func TypeNameRes(Input string) (OutPut string) {
 	switch Input {
 	case "1":
@@ -141,6 +155,7 @@ func TypeNameRes(Input string) (OutPut string) {
 	}
 }
 
+//JudgeCyclesRes 判断胜负
 func JudgeCyclesRes(play1 *Pt.ClientChInfo, play2 *Pt.ClientChInfo) (winner []*Pt.ClientChInfo) {
 	switch play1.Value {
 	case "1":
