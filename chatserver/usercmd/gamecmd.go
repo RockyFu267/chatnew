@@ -51,6 +51,9 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 	tmpData.ChList = append(tmpData.ChList, &infoChTmp)
 	tmpData.Ack = ack
 	tmpData.JoinStatus = true
+	//创建房间的chan
+	var tmpCH = make(chan string, 1)
+	Pt.CyclesRoomChMap["cycles"+gamename] = tmpCH
 	//数值初始化--join时候需要，目前是1v1 后者加入游戏即开始,多人应加上房主标签，其他人ready状态全true，房主可以start
 	Pt.GameCyclesRoom[gamename] = tmpData
 	// infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，可通过命令listroom查看"

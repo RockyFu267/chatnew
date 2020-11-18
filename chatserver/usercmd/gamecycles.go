@@ -13,12 +13,12 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 	strPlay1 := TypeNameRes(infoChTmp.Value)
 	//输入1 等待比较 返回结果
 	//判断对方是否已经输入
-	if len(Pt.TMPCyclesCh) == 1 {
+	if len(Pt.CyclesRoomChMap["cycles"+gamename]) == 1 {
 		for k := range Pt.GameCyclesRoom[gamename].ChList {
 			//找到对手的指针
 			if Pt.GameCyclesRoom[gamename].ChList[k].Name != infoChTmp.Name {
 				//先赋值对手的值
-				Pt.GameCyclesRoom[gamename].ChList[k].Value = <-Pt.TMPCyclesCh
+				Pt.GameCyclesRoom[gamename].ChList[k].Value = <-Pt.CyclesRoomChMap["cycles"+gamename]
 				strPlay2 := TypeNameRes(Pt.GameCyclesRoom[gamename].ChList[k].Value)
 				//先比大小然后输出结果
 				res := JudgeCyclesRes(infoChTmp, Pt.GameCyclesRoom[gamename].ChList[k])
@@ -38,68 +38,67 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 						}
 						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "双方平局"
-						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 					}
 					infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
 					infoChTmp.Ch <- "双方平局"
+					infoChTmp.Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+					infoChTmp.Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+					//跳出循环
+					return
+				}
+				fmt.Println("winner is " + res[0].Name)
+				fmt.Println("winner issssss " + infoChTmp.Name)
+				if res[0].Name == infoChTmp.Name {
+					//初始化
+					infoChTmp.ActionsHistory = false
+					infoChTmp.ActionsStatus = true
+					infoChTmp.WinCount = infoChTmp.WinCount + 1
+					Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+					Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+					Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = Pt.GameCyclesRoom[gamename].ChList[k].LoseCount + 1
+					for k := range Pt.GameCyclesRoom[gamename].ChList {
+						if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+							continue
+						}
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+						Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+					}
+					infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+					infoChTmp.Ch <- infoChTmp.Name + "胜利"
 					infoChTmp.Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
 					infoChTmp.Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 					//跳出循环
 					return
-				} else {
-					fmt.Println("winner is " + res[0].Name)
-					fmt.Println("winner issssss " + infoChTmp.Name)
-					if res[0].Name == infoChTmp.Name {
-						//初始化
-						infoChTmp.ActionsHistory = false
-						infoChTmp.ActionsStatus = true
-						infoChTmp.WinCount = infoChTmp.WinCount + 1
-						Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
-						Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
-						Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = Pt.GameCyclesRoom[gamename].ChList[k].LoseCount + 1
-						for k := range Pt.GameCyclesRoom[gamename].ChList {
-							if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
-								continue
-							}
-							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "胜利"
-							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
-						}
-						infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-						infoChTmp.Ch <- infoChTmp.Name + "胜利"
-						infoChTmp.Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-						infoChTmp.Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
-						//跳出循环
-						return
-					} else {
-						//初始化
-						infoChTmp.ActionsHistory = false
-						infoChTmp.ActionsStatus = true
-						infoChTmp.LoseCount = infoChTmp.LoseCount + 1
-						Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
-						Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
-						Pt.GameCyclesRoom[gamename].ChList[k].WinCount = Pt.GameCyclesRoom[gamename].ChList[k].WinCount + 1
-						for k := range Pt.GameCyclesRoom[gamename].ChList {
-							if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
-								continue
-							}
-							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
-							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-							Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
-
-						}
-						infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
-						infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
-						infoChTmp.Ch <- "当前战绩:" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
-						infoChTmp.Ch <- "当前战绩:" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
-
-						//跳出循环
-						return
-					}
 				}
+				//初始化
+				infoChTmp.ActionsHistory = false
+				infoChTmp.ActionsStatus = true
+				infoChTmp.LoseCount = infoChTmp.LoseCount + 1
+				Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+				Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+				Pt.GameCyclesRoom[gamename].ChList[k].WinCount = Pt.GameCyclesRoom[gamename].ChList[k].WinCount + 1
+				for k := range Pt.GameCyclesRoom[gamename].ChList {
+					if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+						continue
+					}
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+
+				}
+				infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "选择出了:" + strPlay2 + " , " + infoChTmp.Name + "选择出了:" + strPlay1
+				infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "胜利"
+				infoChTmp.Ch <- "当前战绩:\n" + Pt.GameCyclesRoom[gamename].ChList[k].Name + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+				infoChTmp.Ch <- "当前战绩:\n" + infoChTmp.Name + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+
+				//跳出循环
+				return
+
 			}
 
 		}
@@ -109,7 +108,7 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 	}
 	infoChTmp.Value = input
 	strPlay1TMP := TypeNameRes(infoChTmp.Value)
-	Pt.TMPCyclesCh <- infoChTmp.Value
+	Pt.CyclesRoomChMap["cycles"+gamename] <- infoChTmp.Value
 	//对方没输入
 	infoChTmp.Ch <- infoChTmp.Name + ":你选择出" + strPlay1TMP + " 等待对手做出决定"
 	for k := range Pt.GameCyclesRoom[gamename].ChList {
@@ -122,11 +121,6 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 	infoChTmp.ActionsStatus = false
 
 	return
-}
-
-//CyclesJudge 游戏-石头剪刀布
-func CyclesJudge(str1 string, str2 string) {
-
 }
 
 //ReadyCycles 准备开始
