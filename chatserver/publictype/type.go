@@ -61,7 +61,7 @@ type InfoChListStruct struct {
 	JoinStatus bool
 	//GameStatus
 	GameStatus bool
-	//对手是否是掉线
+	//对手是否是掉线 ture 表示为出现掉线状态 第一次获取之后就重置
 	ConnectBroken bool
 	//先出手的值
 	//ActionFirst chan string

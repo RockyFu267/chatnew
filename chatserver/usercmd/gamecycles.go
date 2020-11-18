@@ -41,7 +41,6 @@ func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.S
 			case "3":
 				GameCycles(infoChTmp, "3", gamename)
 			default:
-				fmt.Println("无效指令")
 				infoChTmp.Ch <- infoChTmp.Name + "无效指令,1 对应石头;2 对应剪刀;3 对应布; 请重新输入"
 			}
 		} else {
@@ -60,8 +59,6 @@ func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.S
 			ExitCycles(infoChTmp, gamename)
 			return
 		default:
-			//debug
-			fmt.Println("default")
 			for k := range Pt.GameCyclesRoom[gamename].ChList {
 				Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "在游戏房" + gamename + "说:" + input.Text()
 			}
@@ -84,8 +81,8 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 				strPlay2 := TypeNameRes(Pt.GameCyclesRoom[gamename].ChList[k].Value)
 				//先比大小然后输出结果
 				res := JudgeCyclesRes(infoChTmp, Pt.GameCyclesRoom[gamename].ChList[k])
+				//如果平局
 				if len(res) > 1 {
-					fmt.Println("双方平局")
 					//初始化
 					infoChTmp.ActionsHistory = false
 					infoChTmp.ActionsStatus = true
@@ -93,7 +90,6 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 					Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
 					Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
 					Pt.GameCyclesRoom[gamename].ChList[k].Draw = Pt.GameCyclesRoom[gamename].ChList[k].Draw + 1
-					fmt.Println("双方平局")
 					for k := range Pt.GameCyclesRoom[gamename].ChList {
 						if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
 							continue
@@ -108,10 +104,8 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 					infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
 					infoChTmp.Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 					//跳出循环
-					return
+					break
 				}
-				fmt.Println("winner is " + res[0].Name)
-				fmt.Println("winner issssss " + infoChTmp.Name)
 				//自己胜利
 				if res[0].Name == infoChTmp.Name {
 					//初始化
@@ -135,7 +129,7 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 					infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
 					infoChTmp.Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 					//跳出循环
-					return
+					break
 				}
 				//对方胜利
 				//初始化
@@ -161,17 +155,63 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 				infoChTmp.Ch <- infoChTmp.Name + "当前战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
 
 				//跳出循环
-				return
+				break
 
 			}
 
 		}
 		//这里之后应该加入sign 如果没找到那么说明对方退出了聊天室，游戏结束直接胜利
+		//如果比赛局数达到N局 对局结束房间信息重置
+		if infoChTmp.WinCount+infoChTmp.LoseCount+infoChTmp.Draw >= 10 {
+			for k := range Pt.GameCyclesRoom[gamename].ChList {
+				if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
+					continue
+				}
+				Pt.GameCyclesRoom[gamename].ChList[k].Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "本局最终战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+				Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "本局最终战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+				infoChTmp.Ch <- Pt.GameCyclesRoom[gamename].ChList[k].Name + "本局最终战绩:" + ":\n胜利-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].WinCount) + "\n失败-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].LoseCount) + "\n平局-" + strconv.Itoa(Pt.GameCyclesRoom[gamename].ChList[k].Draw)
+				infoChTmp.Ch <- infoChTmp.Name + "本局最终战绩:" + ":\n胜利-" + strconv.Itoa(infoChTmp.WinCount) + "\n失败-" + strconv.Itoa(infoChTmp.LoseCount) + "\n平局-" + strconv.Itoa(infoChTmp.Draw)
+				if Pt.GameCyclesRoom[gamename].ChList[k].WinCount == infoChTmp.WinCount {
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "最终双方平手"
+					infoChTmp.Ch <- "最终双方平手"
+				}
+				if Pt.GameCyclesRoom[gamename].ChList[k].WinCount > infoChTmp.WinCount {
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "最终的BattleKing是:" + Pt.GameCyclesRoom[gamename].ChList[k].Name
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "恭喜" + Pt.GameCyclesRoom[gamename].ChList[k].Name
+					infoChTmp.Ch <- "最终的BattleKing是:" + Pt.GameCyclesRoom[gamename].ChList[k].Name
+					infoChTmp.Ch <- "恭喜" + Pt.GameCyclesRoom[gamename].ChList[k].Name
+				}
+				if Pt.GameCyclesRoom[gamename].ChList[k].WinCount < infoChTmp.WinCount {
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "最终的BattleKing是:" + infoChTmp.Name
+					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "恭喜" + infoChTmp.Name
+					infoChTmp.Ch <- "最终的BattleKing是:" + infoChTmp.Name
+					infoChTmp.Ch <- "恭喜" + infoChTmp.Name
+				}
+			}
+			for k := range Pt.GameCyclesRoom[gamename].ChList {
+				Pt.GameCyclesRoom[gamename].ChList[k].WinCount = 0
+				Pt.GameCyclesRoom[gamename].ChList[k].LoseCount = 0
+				Pt.GameCyclesRoom[gamename].ChList[k].Draw = 0
+				Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
+				Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
+				if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader != true {
+					Pt.GameCyclesRoom[gamename].ChList[k].ReadyStatus = false
+				}
+			}
+			var tmpDataTMP Pt.InfoChListStruct
+			tmpDataTMP.ChList = Pt.GameCyclesRoom[gamename].ChList
+			tmpDataTMP.Ack = Pt.GameCyclesRoom[gamename].Ack
+			tmpDataTMP.JoinStatus = false
+			tmpDataTMP.GameStatus = false
+			Pt.GameCyclesRoom[gamename] = tmpDataTMP
+		}
 		return
 		//更新所有玩家状态以及初始化房间
 	}
 	infoChTmp.Value = input
 	strPlay1TMP := TypeNameRes(infoChTmp.Value)
+	//快乐输出
+	fmt.Println(infoChTmp.Name + ":" + strPlay1TMP)
 	Pt.CyclesRoomChMap["cycles"+gamename] <- infoChTmp.Value
 	//对方没输入
 	infoChTmp.Ch <- infoChTmp.Name + ":你选择出" + strPlay1TMP + " 等待对手做出决定"
@@ -251,9 +291,6 @@ func StartCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
 				for k := range Pt.GameCyclesRoom[gamename].ChList {
 					Pt.GameCyclesRoom[gamename].ChList[k].Ch <- "比赛开始"
 				}
-				//debug
-				fmt.Println("全员已准备")
-				//---------
 			} else {
 				infoChTmp.Ch <- infoChTmp.Name + ":你不是房主，没有开始权限"
 				break
@@ -264,9 +301,6 @@ func StartCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
 
 //ExitCycles 退出房间
 func ExitCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
-	//debug
-	fmt.Println("exit")
-	//-----------------
 	//如果房间只有自己 那就退出并删除房间
 	if len(Pt.GameCyclesRoom[gamename].ChList) == 1 {
 		delete(Pt.GameCyclesRoom, gamename)
@@ -294,11 +328,6 @@ func ExitCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
 	}
 	Pt.GameCyclesRoom[gamename] = tmpData
 	infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
-	//debug
-	fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].RoomLeader)
-	fmt.Println(Pt.GameCyclesRoom[gamename].ChList[0].Name)
-	fmt.Println(len(Pt.GameCyclesRoom[gamename].ChList))
-	//-----------------
 	return
 }
 
