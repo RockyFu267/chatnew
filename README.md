@@ -1,5 +1,7 @@
 # chatnew
 A simple chat room
+写这个的初衷是我司的安全规则不允许我们使用微信等通讯工具，在某一段时间内发现没有可以和同事沟通的聊天工具，所以想着自己写个聊天室；
+顺带着练练golang；
 
 ## 目录结构
 + server端: 主目录/chatserver;启动命令:`go run main.go`;端口默认18000;
