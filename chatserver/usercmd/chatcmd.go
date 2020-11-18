@@ -119,6 +119,7 @@ func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		return
 	}
 	//正常赋值
+	infoChTmp.RoomLeader = true
 	var tmpData Pt.ChatGroup
 	tmpData.Name = roomname
 	tmpData.ChList = append(tmpData.ChList, infoChTmp)
@@ -312,7 +313,7 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		//遍历公共管道数组 公共广播
 		for k := range Pt.InfoPubChList {
 			if Pt.InfoPubChList[k].Name != "" {
-				Pt.InfoPubChList[k].Ch <- infoChTmp.Name + ": " + input.Text()
+				Pt.InfoPubChList[k].Ch <- infoChTmp.Name + "在公共房间广播说: " + input.Text()
 			}
 		}
 	}

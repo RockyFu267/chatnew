@@ -116,6 +116,11 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 				Uc.DeleteFriends(&infoChTmp, tmpinfo.Address, input)
 			case "help":
 				infoChTmp.Ch <- "命令提示: " + Pf.Helpstring()
+			//游戏
+			case "createcycles":
+				Uc.CreateCycles(infoChTmp, tmpinfo.Address, input)
+			case "joincycles":
+				Uc.JoinCycles(infoChTmp, tmpinfo.Address, input)
 			default:
 				Uc.DefaultCmd(infoChTmp, tmpinfo.Address, input)
 			}
@@ -130,7 +135,7 @@ func handleConn(tmpinfo *Pt.ClientInfo) {
 			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "主动断开连接")
 			Cf.DeleteConn(infoChTmp, ch, tmpinfo)
 			return
-		case <-time.After(time.Duration(180 * time.Second)):
+		case <-time.After(time.Duration(1800 * time.Second)):
 			Pt.Messages <- infoChTmp.Address + ":" + infoChTmp.Name + "timeout has left"
 			fmt.Println(infoChTmp.Address + ":" + infoChTmp.Name + "超时断开连接")
 			Cf.DeleteConn(infoChTmp, ch, tmpinfo)
