@@ -17,7 +17,7 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
-	infoChTmp.Ch <- infoChTmp.Address + ":输入要创建的房间号"
+	infoChTmp.Ch <- infoChTmp.Address + ":输入要创建的游戏房间号"
 	var gamename string
 	if input.Scan() {
 		gamename = input.Text()
@@ -96,7 +96,7 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
-	infoChTmp.Ch <- infoChTmp.Name + ":输入要加入的房间号"
+	infoChTmp.Ch <- infoChTmp.Name + ":输入要加入的游戏房间号"
 	var gamename string
 	if input.Scan() {
 		gamename = input.Text()
