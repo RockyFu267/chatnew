@@ -71,3 +71,13 @@ func Helpstring() string {
 		- #          : 向某个已经创建过的房间悄悄发送消息(格式如下:#房间名 内容)
         `)
 }
+
+//HelpCyclesstring 返回help
+func HelpCyclesstring() string {
+	return (`
+	please choose options:
+		- start : 开始游戏(房主)
+		- ready : 准备开始游戏(非房主) 
+		- exit  : 退出房间 
+        `)
+}

@@ -2,6 +2,7 @@ package usercmd
 
 import (
 	"bufio"
+	Pf "chatserver/publicfunc"
 	Pt "chatserver/publictype"
 	"fmt"
 	"strconv"
@@ -57,6 +58,8 @@ func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.S
 			StartCycles(infoChTmp, gamename)
 		case "exit":
 			ExitCycles(infoChTmp, gamename)
+		case "help":
+			infoChTmp.Ch <- "命令提示: " + Pf.HelpCyclesstring()
 			return
 		default:
 			for k := range Pt.GameCyclesRoom[gamename].ChList {
