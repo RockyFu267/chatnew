@@ -11,7 +11,7 @@ import (
 func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.Scanner, ack string) {
 	//发送心跳给最外层 以及房间的管道
 	//判断对方是否已经断开连接
-	if len(Pt.GameCyclesRoom[gamename].ChList) == 1 && Pt.GameCyclesRoom[gamename].ConnectBroken == true {
+	if len(Pt.GameCyclesRoom[gamename].ChList) == 1 && Pt.GameCyclesRoom[gamename].ConnectBroken {
 		infoChTmp.Ch <- infoChTmp.Name + ":对手断开连接，你赢了"
 		//正常赋值
 		infoChTmp.RoomLeader = true
@@ -30,9 +30,9 @@ func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.S
 
 	}
 	//如果是比赛状态
-	if Pt.GameCyclesRoom[gamename].GameStatus == true {
+	if Pt.GameCyclesRoom[gamename].GameStatus {
 		//判断我本轮是否已经操作过了
-		if infoChTmp.ActionsHistory == false && infoChTmp.ActionsStatus == true {
+		if !infoChTmp.ActionsHistory && infoChTmp.ActionsStatus {
 			switch input.Text() {
 			case "1":
 				GameCycles(infoChTmp, "1", gamename)
@@ -194,7 +194,7 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 				Pt.GameCyclesRoom[gamename].ChList[k].Draw = 0
 				Pt.GameCyclesRoom[gamename].ChList[k].ActionsHistory = false
 				Pt.GameCyclesRoom[gamename].ChList[k].ActionsStatus = true
-				if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader != true {
+				if !Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader {
 					Pt.GameCyclesRoom[gamename].ChList[k].ReadyStatus = false
 				}
 			}
@@ -224,7 +224,6 @@ func GameCycles(infoChTmp *Pt.ClientChInfo, input string, gamename string) {
 	infoChTmp.ActionsHistory = true
 	infoChTmp.ActionsStatus = false
 
-	return
 }
 
 //ReadyCycles 准备开始
@@ -232,7 +231,7 @@ func ReadyCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
 	//判断自己是不是房主 是房主不能准备 只能开始
 	for k := range Pt.GameCyclesRoom[gamename].ChList {
 		if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
-			if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
+			if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader {
 				infoChTmp.Ch <- infoChTmp.Name + ":你是房主，不能准备(可以在全员准备情况下开始)"
 				break
 			} else {
@@ -263,10 +262,10 @@ func StartCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
 	//判断自己是不是房主 是房主才能开始
 	for k := range Pt.GameCyclesRoom[gamename].ChList {
 		if Pt.GameCyclesRoom[gamename].ChList[k].Name == infoChTmp.Name {
-			if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader == true {
+			if Pt.GameCyclesRoom[gamename].ChList[k].RoomLeader {
 				//先判断是不是所有人都准备了
 				for j := range Pt.GameCyclesRoom[gamename].ChList {
-					if Pt.GameCyclesRoom[gamename].ChList[j].ReadyStatus == true {
+					if Pt.GameCyclesRoom[gamename].ChList[j].ReadyStatus {
 						continue
 					} else {
 						//标记存在没准备的
@@ -277,7 +276,7 @@ func StartCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
 						}
 					}
 				}
-				if sign == true {
+				if sign {
 					break
 				}
 				//更改房间比赛状态
@@ -307,14 +306,14 @@ func ExitCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
 		infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被注销"
 		return
 	}
-	var tmpData Pt.InfoChListStruct
-	tmpData = Pt.GameCyclesRoom[gamename]
+
+	var tmpData = Pt.GameCyclesRoom[gamename]
 	//记录修改前的状态
 	var sign bool
 	for k := range tmpData.ChList {
 		if tmpData.ChList[k].Name == infoChTmp.Name {
 			//判断自己还是不是房主
-			if tmpData.ChList[k].RoomLeader == true {
+			if tmpData.ChList[k].RoomLeader {
 				sign = true
 			}
 			tmpData.ChList = append(tmpData.ChList[:k], tmpData.ChList[k+1:]...)
@@ -322,13 +321,12 @@ func ExitCycles(infoChTmp *Pt.ClientChInfo, gamename string) {
 		}
 	}
 	//还是房主,就移交给目前0元素位的用户
-	if sign == true {
+	if sign {
 		tmpData.ChList[0].RoomLeader = true
 		tmpData.ChList[0].ReadyStatus = true
 	}
 	Pt.GameCyclesRoom[gamename] = tmpData
 	infoChTmp.Ch <- infoChTmp.Name + ":退出房间，房间被移交给其他用户"
-	return
 }
 
 //TypeNameRes 翻译结果

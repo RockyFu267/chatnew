@@ -9,8 +9,7 @@ import (
 
 //CreateCycles 创建石头剪刀布的房间 1v1
 func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scanner) {
-	var infoChTmp Pt.ClientChInfo
-	infoChTmp = infoChTmpData
+	var infoChTmp = infoChTmpData
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
 		infoChTmp.Ch <- address + ": " + "请先输入昵称"
@@ -24,7 +23,7 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 	}
 	//合法性检查
 	judge := Pf.JudgeStringSpecialSymbol(gamename)
-	if judge == false {
+	if !judge {
 		infoChTmp.Ch <- infoChTmp.Name + ":房间号只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		return
 	}
@@ -39,7 +38,7 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 		ack = input.Text()
 	}
 	judgeack := Pf.JudgeStringSpecialSymbol(ack)
-	if judgeack == false {
+	if !judgeack {
 		infoChTmp.Ch <- infoChTmp.Name + ":AccessKey只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		return
 	}
@@ -83,13 +82,11 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 		delete(Pt.GameCyclesRoom, gamename)
 		return
 	}
-	return
 }
 
 //JoinCycles 加入房间命令
 func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scanner) {
-	var infoChTmp Pt.ClientChInfo
-	infoChTmp = infoChTmpData
+	var infoChTmp = infoChTmpData
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
 		infoChTmp.Ch <- address + ": " + "请先输入昵称"
@@ -111,7 +108,7 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 			}
 		}
 		//房间人数上限或游戏中有人退出(德扑的房间存在被淘汰的玩家离场的情况)
-		if len(Pt.GameCyclesRoom[gamename].ChList) >= 2 || Pt.GameCyclesRoom[gamename].JoinStatus == false {
+		if len(Pt.GameCyclesRoom[gamename].ChList) >= 2 || !Pt.GameCyclesRoom[gamename].JoinStatus {
 			//debug
 			fmt.Println(Pt.GameCyclesRoom[gamename].JoinStatus, "----------------")
 			//------
@@ -169,6 +166,5 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 
 	//循环中没有房间name
 	infoChTmp.Ch <- "房间不存在，可通过命令listcycles查看"
-	return
 
 }
