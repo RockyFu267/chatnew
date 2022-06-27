@@ -86,7 +86,7 @@ func Listroom(infoChTmp Pt.ClientChInfo) {
 func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
@@ -132,7 +132,7 @@ func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 func Joinroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
@@ -191,7 +191,7 @@ func Joinroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//先检查有没有昵称
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		//重来 判断
 		return
@@ -323,7 +323,7 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 func AddFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
@@ -371,7 +371,7 @@ func AddFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner
 func DeleteFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}

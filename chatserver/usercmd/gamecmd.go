@@ -12,7 +12,7 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 	var infoChTmp = infoChTmpData
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
@@ -89,7 +89,7 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 	var infoChTmp = infoChTmpData
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
