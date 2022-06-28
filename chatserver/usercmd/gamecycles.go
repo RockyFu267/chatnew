@@ -58,6 +58,7 @@ func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.S
 			StartCycles(infoChTmp, gamename)
 		case "exit":
 			ExitCycles(infoChTmp, gamename)
+			return
 		case "help":
 			infoChTmp.Ch <- "命令提示: " + Pf.HelpCyclesstring()
 			return
