@@ -22,7 +22,7 @@ func MyName(infoChTmp *Pt.ClientChInfo, tmpinfo *Pt.ClientInfo, input *bufio.Sca
 	}
 	//检查合法性
 	judge := Pf.JudgeStringSpecialSymbol(myname)
-	if judge == false {
+	if !judge {
 		infoChTmp.Ch <- infoChTmp.Address + ":昵称只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		//重新循环用户输入
 		return
@@ -39,7 +39,7 @@ func MyName(infoChTmp *Pt.ClientChInfo, tmpinfo *Pt.ClientInfo, input *bufio.Sca
 		}
 	}
 	//出现重名重新循环用户输入
-	if sign == true {
+	if sign {
 		return
 	}
 	//一切正常 赋值
@@ -86,7 +86,7 @@ func Listroom(infoChTmp Pt.ClientChInfo) {
 func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
@@ -97,7 +97,7 @@ func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 	}
 	//合法性检查
 	judge := Pf.JudgeStringSpecialSymbol(roomname)
-	if judge == false {
+	if !judge {
 		infoChTmp.Ch <- infoChTmp.Name + ":房间号只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		return
 	}
@@ -114,7 +114,7 @@ func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 		ack = input.Text()
 	}
 	judgeack := Pf.JudgeStringSpecialSymbol(ack)
-	if judgeack == false {
+	if !judgeack {
 		infoChTmp.Ch <- infoChTmp.Name + ":AccessKey只支持大小写A-z以及0-9,长度不超过20,不小于2"
 		return
 	}
@@ -132,7 +132,7 @@ func Createroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 func Joinroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
@@ -191,7 +191,7 @@ func Joinroom(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//先检查有没有昵称
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		//重来 判断
 		return
@@ -306,7 +306,7 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 				break
 			}
 		}
-		if sign == false {
+		if !sign {
 			infoChTmp.Ch <- "请先加入public房间"
 			return
 		}
@@ -323,7 +323,7 @@ func DefaultCmd(infoChTmp Pt.ClientChInfo, address string, input *bufio.Scanner)
 func AddFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
@@ -371,7 +371,7 @@ func AddFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner
 func DeleteFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scanner) {
 	//判断是否有昵称 没有昵称不能操作
 	if infoChTmp.Name == "" {
-		infoChTmp.Ch <- address + ": " + "请先输入昵称"
+		infoChTmp.Ch <- address + ": " + "请先输入昵称,命令<myname>"
 		infoChTmp.Ch <- address + ": " + Pf.Helpstring()
 		return
 	}
@@ -407,5 +407,4 @@ func DeleteFriends(infoChTmp *Pt.ClientChInfo, address string, input *bufio.Scan
 		return
 	}
 	infoChTmp.Ch <- "user not found in your friednslist"
-	return
 }
