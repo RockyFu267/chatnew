@@ -59,10 +59,11 @@ func CreateCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Sc
 	infoChTmp.Ch <- infoChTmp.Name + ":房间创建成功，等待对手"
 	//进入游戏房间随时开始
 	for input.Scan() {
-		if input.Text() == "exit" {
+		inputStr := input.Text()
+		if inputStr == "exit" {
 			break
 		}
-		CyclesInputScan(&infoChTmp, gamename, input, ack)
+		CyclesInputScan(&infoChTmp, gamename, inputStr, ack)
 	}
 	//主动或被动断开连接退出房间或者直接判负
 	//wait
@@ -141,10 +142,11 @@ func JoinCycles(infoChTmpData Pt.ClientChInfo, address string, input *bufio.Scan
 		infoChTmp.Ch <- infoChTmp.Name + ":房间加入成功"
 		//进入游戏房间随时开始
 		for input.Scan() {
-			if input.Text() == "exit" {
+			inputStr := input.Text()
+			if inputStr == "exit" {
 				break
 			}
-			CyclesInputScan(&infoChTmp, gamename, input, ack)
+			CyclesInputScan(&infoChTmp, gamename, inputStr, ack)
 		}
 		//主动或被动断开连接退出房间或者直接判负
 		//wait

@@ -1,7 +1,6 @@
 package usercmd
 
 import (
-	"bufio"
 	Pf "chatserver/publicfunc"
 	Pt "chatserver/publictype"
 	"fmt"
@@ -9,7 +8,7 @@ import (
 )
 
 //CyclesInputScan 进入石头剪刀布的流程
-func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.Scanner, ack string) {
+func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input string, ack string) {
 	//发送心跳给最外层 以及房间的管道
 	//判断对方是否已经断开连接
 	if len(Pt.GameCyclesRoom[gamename].ChList) == 1 && Pt.GameCyclesRoom[gamename].ConnectBroken {
@@ -34,7 +33,7 @@ func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.S
 	if Pt.GameCyclesRoom[gamename].GameStatus {
 		//判断我本轮是否已经操作过了
 		if !infoChTmp.ActionsHistory && infoChTmp.ActionsStatus {
-			switch input.Text() {
+			switch input {
 			case "1":
 				GameCycles(infoChTmp, "1", gamename)
 			case "2":
@@ -50,7 +49,7 @@ func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.S
 		}
 
 	} else {
-		switch input.Text() {
+		switch input {
 		//后期会加转让房主的功能所以这里创建者和加入者的条件判断一致
 		case "ready":
 			ReadyCycles(infoChTmp, gamename)
@@ -64,7 +63,7 @@ func CyclesInputScan(infoChTmp *Pt.ClientChInfo, gamename string, input *bufio.S
 			return
 		default:
 			for k := range Pt.GameCyclesRoom[gamename].ChList {
-				Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "在游戏房" + gamename + "说:" + input.Text()
+				Pt.GameCyclesRoom[gamename].ChList[k].Ch <- infoChTmp.Name + "在游戏房" + gamename + "说:" + input
 			}
 		}
 	}
